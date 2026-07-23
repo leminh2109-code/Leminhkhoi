@@ -9,6 +9,55 @@ import { Entry } from "@/lib/types";
 import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS } from "@/lib/utils";
 import toast from "react-hot-toast";
 
+function ShareCard() {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window !== "undefined" ? `${window.location.origin}/family` : "/family";
+
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Nhật ký Khôi", url });
+      } catch {}
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
+      <span className="text-xl flex-shrink-0">🔗</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-purple-700 mb-0.5">Link chia sẻ với gia đình</p>
+        <p className="text-xs text-purple-400 truncate">{url}</p>
+      </div>
+      <div className="flex gap-1.5 flex-shrink-0">
+        <button
+          onClick={handleCopy}
+          className="px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-xs font-medium text-purple-600 hover:bg-purple-50 transition"
+        >
+          {copied ? "✓ Đã copy" : "Copy"}
+        </button>
+        {typeof navigator !== "undefined" && "share" in navigator && (
+          <button
+            onClick={handleShare}
+            className="px-2.5 py-1.5 rounded-lg bg-purple-600 text-xs font-medium text-white hover:bg-purple-700 transition"
+          >
+            Chia sẻ
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -161,6 +210,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Share card */}
+        <ShareCard />
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-2 mb-6">
