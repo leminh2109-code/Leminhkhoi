@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { EntryType } from "@/lib/types";
+import { EntryType, Entry } from "@/lib/types";
 import toast from "react-hot-toast";
 
 type EntryTypeOption = {
@@ -20,18 +20,31 @@ const typeOptions: EntryTypeOption[] = [
 
 interface EntryModalProps {
   defaultType?: EntryType;
+  entry?: Entry;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function EntryModal({ defaultType = "MEMORY", onClose, onSaved }: EntryModalProps) {
-  const [type, setType] = useState<EntryType>(defaultType);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [emoji, setEmoji] = useState("");
-  const [metadata, setMetadata] = useState<Record<string, string>>({});
-  const [images, setImages] = useState<string[]>([]);
+export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: EntryModalProps) {
+  const isEditing = !!entry;
+  const [type, setType] = useState<EntryType>(entry?.type ?? defaultType);
+  const [title, setTitle] = useState(entry?.title ?? "");
+  const [description, setDescription] = useState(entry?.description ?? "");
+  const [date, setDate] = useState(
+    entry ? new Date(entry.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
+  );
+  const [endDate, setEndDate] = useState((entry?.metadata?.endDate as string) ?? "");
+  const [emoji, setEmoji] = useState(entry?.emoji ?? "");
+  const [metadata, setMetadata] = useState<Record<string, string>>(
+    entry
+      ? Object.fromEntries(
+          Object.entries(entry.metadata)
+            .filter(([k]) => k !== "endDate")
+            .map(([k, v]) => [k, String(v)])
+        )
+      : {}
+  );
+  const [images, setImages] = useState<string[]>(entry?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -55,14 +68,28 @@ export function EntryModal({ defaultType = "MEMORY", onClose, onSaved }: EntryMo
   async function handleSave() {
     if (!title.trim()) { toast.error("Nhập tiêu đề đi bạn"); return; }
     setSaving(true);
-    const res = await fetch("/api/entries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, title, description, date, emoji, images, metadata }),
-    });
+
+    const finalMetadata = { ...metadata };
+    if (endDate) finalMetadata.endDate = endDate;
+    else delete finalMetadata.endDate;
+
+    const payload = { type, title, description, date, emoji, images, metadata: finalMetadata };
+
+    const res = isEditing
+      ? await fetch(`/api/entries/${entry.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+      : await fetch("/api/entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
     setSaving(false);
     if (res.ok) {
-      toast.success("Đã lưu!");
+      toast.success(isEditing ? "Đã cập nhật!" : "Đã lưu!");
       onSaved();
       onClose();
     } else {
@@ -78,7 +105,7 @@ export function EntryModal({ defaultType = "MEMORY", onClose, onSaved }: EntryMo
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 className="text-base font-semibold text-gray-800">Thêm mới</h2>
+        <h2 className="text-base font-semibold text-gray-800">{isEditing ? "Sửa" : "Thêm mới"}</h2>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -89,26 +116,28 @@ export function EntryModal({ defaultType = "MEMORY", onClose, onSaved }: EntryMo
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
-        {/* Type selector */}
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-2">Loại</label>
-          <div className="flex gap-2 flex-wrap">
-            {typeOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setType(opt.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                  type === opt.value
-                    ? "bg-purple-600 text-white border-purple-600"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
-                }`}
-              >
-                <span>{opt.emoji}</span>
-                {opt.label}
-              </button>
-            ))}
+        {/* Type selector — only show when adding */}
+        {!isEditing && (
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Loại</label>
+            <div className="flex gap-2 flex-wrap">
+              {typeOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setType(opt.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                    type === opt.value
+                      ? "bg-purple-600 text-white border-purple-600"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
+                  }`}
+                >
+                  <span>{opt.emoji}</span>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Title */}
         <div>
@@ -121,25 +150,39 @@ export function EntryModal({ defaultType = "MEMORY", onClose, onSaved }: EntryMo
           />
         </div>
 
-        {/* Date + Emoji */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Ngày</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
-            />
+        {/* Date range + Emoji */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Ngày bắt đầu</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Emoji</label>
+              <input
+                value={emoji}
+                onChange={(e) => setEmoji(e.target.value)}
+                placeholder="🎂"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition text-center text-xl"
+                maxLength={4}
+              />
+            </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Emoji</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">
+              Ngày kết thúc <span className="font-normal text-gray-300">(tùy chọn)</span>
+            </label>
             <input
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
-              placeholder="🎂"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition text-center text-xl"
-              maxLength={4}
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={date}
+              className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
             />
           </div>
         </div>

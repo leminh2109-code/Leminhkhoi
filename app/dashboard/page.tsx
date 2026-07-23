@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { getKhoiAge, formatDate, ENTRY_TYPE_LABELS } from "@/lib/utils";
+import { getKhoiAge, formatDateRange, ENTRY_TYPE_LABELS } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +25,13 @@ export default function DashboardPage() {
     const res = await fetch("/api/entries?limit=10");
     if (res.ok) setEntries(await res.json());
     setLoading(false);
+  }
+
+  async function deleteEntry(id: string) {
+    if (!window.confirm("Xóa mục này?")) return;
+    const res = await fetch(`/api/entries/${id}`, { method: "DELETE" });
+    if (res.ok) { toast.success("Đã xóa"); fetchEntries(); }
+    else toast.error("Xóa thất bại");
   }
 
   useEffect(() => {
@@ -57,8 +66,12 @@ export default function DashboardPage() {
 
   return (
     <PageShell>
-      {showModal && (
-        <EntryModal onClose={() => setShowModal(false)} onSaved={fetchEntries} />
+      {(showModal || editingEntry) && (
+        <EntryModal
+          entry={editingEntry ?? undefined}
+          onClose={() => { setShowModal(false); setEditingEntry(null); }}
+          onSaved={fetchEntries}
+        />
       )}
 
       <div className="px-4 pt-6 pb-2">
@@ -131,26 +144,41 @@ export default function DashboardPage() {
             {entries.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-white rounded-xl border border-gray-100 p-4 flex items-start gap-3"
+                className="bg-white rounded-xl border border-gray-100 overflow-hidden"
               >
-                <div className={`w-10 h-10 rounded-xl ${TYPE_COLORS[entry.type] || "bg-gray-50"} flex items-center justify-center text-xl flex-shrink-0`}>
-                  {entry.emoji || "📌"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 leading-snug">{entry.title}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[11px] text-gray-400">{formatDate(entry.date)}</span>
-                    <span className="text-[11px] text-gray-300">·</span>
-                    <span className="text-[11px] text-gray-400">{ENTRY_TYPE_LABELS[entry.type]}</span>
+                <div className="p-4 flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${TYPE_COLORS[entry.type] || "bg-gray-50"} flex items-center justify-center text-xl flex-shrink-0`}>
+                    {entry.emoji || "📌"}
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 leading-snug">{entry.title}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[11px] text-gray-400">
+                        {formatDateRange(entry.date, entry.metadata.endDate as string)}
+                      </span>
+                      <span className="text-[11px] text-gray-300">·</span>
+                      <span className="text-[11px] text-gray-400">{ENTRY_TYPE_LABELS[entry.type]}</span>
+                    </div>
+                  </div>
+                  {entry.images.length > 0 && (
+                    <img src={entry.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                  )}
                 </div>
-                {entry.images.length > 0 && (
-                  <img
-                    src={entry.images[0]}
-                    alt=""
-                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                  />
-                )}
+                <div className="flex border-t border-gray-50">
+                  <button
+                    onClick={() => setEditingEntry(entry)}
+                    className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                  >
+                    Sửa
+                  </button>
+                  <div className="w-px bg-gray-100" />
+                  <button
+                    onClick={() => deleteEntry(entry.id)}
+                    className="flex-1 py-2 text-xs text-red-400 font-medium hover:bg-red-50 transition"
+                  >
+                    Xóa
+                  </button>
+                </div>
               </div>
             ))}
           </div>

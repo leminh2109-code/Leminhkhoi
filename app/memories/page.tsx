@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { formatDateLong } from "@/lib/utils";
+import { formatDateRangeLong } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 export default function MemoriesPage() {
   const { status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
 
   useEffect(() => {
@@ -28,12 +30,25 @@ export default function MemoriesPage() {
     if (status === "authenticated") fetchEntries();
   }, [status]);
 
+  async function deleteEntry(id: string) {
+    if (!window.confirm("Xóa kỷ niệm này?")) return;
+    const res = await fetch(`/api/entries/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Đã xóa");
+      setSelected(null);
+      fetchEntries();
+    } else {
+      toast.error("Xóa thất bại");
+    }
+  }
+
   return (
     <PageShell>
-      {showModal && (
+      {(showModal || editingEntry) && (
         <EntryModal
           defaultType="MEMORY"
-          onClose={() => setShowModal(false)}
+          entry={editingEntry ?? undefined}
+          onClose={() => { setShowModal(false); setEditingEntry(null); }}
           onSaved={fetchEntries}
         />
       )}
@@ -48,6 +63,18 @@ export default function MemoriesPage() {
               </svg>
             </button>
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
+            <button
+              onClick={() => { setEditingEntry(selected); setSelected(null); }}
+              className="text-sm text-purple-600 font-medium"
+            >
+              Sửa
+            </button>
+            <button
+              onClick={() => deleteEntry(selected.id)}
+              className="text-sm text-red-400 font-medium"
+            >
+              Xóa
+            </button>
           </div>
 
           {selected.images.length > 0 && (
@@ -63,7 +90,9 @@ export default function MemoriesPage() {
               {selected.emoji && <span className="text-3xl">{selected.emoji}</span>}
               <div>
                 <p className="text-base font-semibold text-gray-800">{selected.title}</p>
-                <p className="text-xs text-gray-400">{formatDateLong(selected.date)}</p>
+                <p className="text-xs text-gray-400">
+                  {formatDateRangeLong(selected.date, selected.metadata.endDate as string)}
+                </p>
               </div>
             </div>
             {selected.description && (
@@ -96,33 +125,54 @@ export default function MemoriesPage() {
         ) : (
           <div className="space-y-3">
             {entries.map((entry) => (
-              <button
+              <div
                 key={entry.id}
-                onClick={() => setSelected(entry)}
-                className="w-full bg-white rounded-xl border border-gray-100 p-4 flex items-start gap-3 text-left active:bg-gray-50 transition"
+                className="bg-white rounded-xl border border-gray-100 overflow-hidden"
               >
-                {entry.images[0] ? (
-                  <img src={entry.images[0]} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 rounded-xl bg-coral-50 flex items-center justify-center text-2xl flex-shrink-0">
-                    {entry.emoji || "💛"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 leading-snug">{entry.title}</p>
-                  {entry.description && (
-                    <p className="text-xs text-gray-400 mt-1 leading-relaxed line-clamp-2">{entry.description}</p>
+                <button
+                  onClick={() => setSelected(entry)}
+                  className="w-full p-4 flex items-start gap-3 text-left active:bg-gray-50 transition"
+                >
+                  {entry.images[0] ? (
+                    <img src={entry.images[0]} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-coral-50 flex items-center justify-center text-2xl flex-shrink-0">
+                      {entry.emoji || "💛"}
+                    </div>
                   )}
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <p className="text-[11px] text-gray-300">{formatDateLong(entry.date)}</p>
-                    <span className="text-[11px] text-gray-300">·</span>
-                    <p className="text-[11px] text-gray-300">{entry.author.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 leading-snug">{entry.title}</p>
+                    {entry.description && (
+                      <p className="text-xs text-gray-400 mt-1 leading-relaxed line-clamp-2">{entry.description}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <p className="text-[11px] text-gray-300">
+                        {formatDateRangeLong(entry.date, entry.metadata.endDate as string)}
+                      </p>
+                      <span className="text-[11px] text-gray-300">·</span>
+                      <p className="text-[11px] text-gray-300">{entry.author.name}</p>
+                    </div>
                   </div>
+                  {entry.images.length > 1 && (
+                    <span className="text-[11px] text-gray-300 flex-shrink-0">+{entry.images.length - 1}</span>
+                  )}
+                </button>
+                <div className="flex border-t border-gray-50">
+                  <button
+                    onClick={() => setEditingEntry(entry)}
+                    className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                  >
+                    Sửa
+                  </button>
+                  <div className="w-px bg-gray-100" />
+                  <button
+                    onClick={() => deleteEntry(entry.id)}
+                    className="flex-1 py-2 text-xs text-red-400 font-medium hover:bg-red-50 transition"
+                  >
+                    Xóa
+                  </button>
                 </div>
-                {entry.images.length > 1 && (
-                  <span className="text-[11px] text-gray-300 flex-shrink-0">+{entry.images.length - 1}</span>
-                )}
-              </button>
+              </div>
             ))}
           </div>
         )}

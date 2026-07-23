@@ -24,6 +24,18 @@ export function formatDateLong(date: Date | string) {
   return format(new Date(date), "d MMMM yyyy", { locale: vi });
 }
 
+export function formatDateRange(date: Date | string, endDate?: string | null) {
+  const start = formatDate(date);
+  if (!endDate) return start;
+  return `${start} – ${formatDate(endDate)}`;
+}
+
+export function formatDateRangeLong(date: Date | string, endDate?: string | null) {
+  const start = formatDateLong(date);
+  if (!endDate) return start;
+  return `${start} – ${formatDateLong(endDate)}`;
+}
+
 export const ENTRY_TYPE_LABELS: Record<string, string> = {
   MEMORY: "Kỷ niệm",
   TRAVEL: "Du lịch",
