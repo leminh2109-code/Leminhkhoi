@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment variables - KHÔNG push lên GitHub
+.env
+.env.local
+.env.production.local
+
+# Build
+dist/
+build/
+
+# Misc
+.DS_Store
+*.pem
+tsconfig.tsbuildinfo

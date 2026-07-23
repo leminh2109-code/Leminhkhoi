@@ -1,0 +1,43 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("PARENT")
+  createdAt DateTime @default(now())
+  entries   Entry[]
+}
+
+model Entry {
+  id          String   @id @default(cuid())
+  type        EntryType
+  title       String
+  description String?
+  date        DateTime
+  emoji       String?
+  images      String   @default("[]")
+  metadata    String   @default("{}")
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum EntryType {
+  MEMORY
+  TRAVEL
+  EDUCATION
+  BOOK
+  SKILL
+  SCHOOL
+}
