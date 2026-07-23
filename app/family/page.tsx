@@ -184,18 +184,6 @@ export default function FamilyPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
-                {entry.images.length > 1 && (
-                  <div className="px-4 pb-3 flex gap-1.5">
-                    {entry.images.slice(1, 4).map((img, i) => (
-                      <img key={i} src={img} alt="" className="w-14 h-10 rounded-lg object-cover" />
-                    ))}
-                    {entry.images.length > 4 && (
-                      <div className="w-14 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                        +{entry.images.length - 4}
-                      </div>
-                    )}
-                  </div>
-                )}
               </button>
             ))}
           </div>
