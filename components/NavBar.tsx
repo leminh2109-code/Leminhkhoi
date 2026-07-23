@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -15,6 +16,18 @@ const navItems = [
 
 export function NavBar() {
   const pathname = usePathname();
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    const url = `${window.location.origin}/family`;
+    if (navigator.share) {
+      try { await navigator.share({ title: "Nhật ký Khôi", url }); } catch {}
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <>
@@ -48,6 +61,15 @@ export function NavBar() {
             );
           })}
         </nav>
+
+        {/* Share button at bottom of sidebar */}
+        <button
+          onClick={handleShare}
+          className="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-purple-500 hover:bg-purple-50 transition w-full"
+        >
+          <span className="text-lg leading-none">🔗</span>
+          {copied ? "✓ Đã copy link!" : "Chia sẻ với gia đình"}
+        </button>
       </aside>
 
       {/* Mobile: bottom nav */}
