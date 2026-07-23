@@ -380,17 +380,45 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
 
         {/* Image upload */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-2">Ảnh</label>
+          <label className="block text-xs font-medium text-gray-500 mb-2">
+            Ảnh
+            {images.length > 1 && (
+              <span className="ml-1.5 font-normal text-gray-400">· bấm ⭐ để chọn ảnh đại diện</span>
+            )}
+          </label>
           <div className="flex gap-2 flex-wrap">
             {images.map((url, i) => (
               <div key={i} className="relative w-20 h-20">
-                <img src={url} alt="" className="w-20 h-20 rounded-xl object-cover" />
+                <img
+                  src={url}
+                  alt=""
+                  className={`w-20 h-20 rounded-xl object-cover ${i === 0 ? "ring-2 ring-yellow-400" : ""}`}
+                />
+                {/* Remove button */}
                 <button
                   onClick={() => setImages((imgs) => imgs.filter((_, j) => j !== i))}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full text-xs flex items-center justify-center"
                 >
                   ×
                 </button>
+                {/* Cover badge / set-as-cover button */}
+                {images.length > 1 && (
+                  i === 0 ? (
+                    <span className="absolute bottom-1 left-1 text-sm leading-none">⭐</span>
+                  ) : (
+                    <button
+                      onClick={() => setImages((imgs) => {
+                        const next = [...imgs];
+                        next.splice(i, 1);
+                        return [url, ...next];
+                      })}
+                      className="absolute bottom-1 left-1 text-sm leading-none opacity-50 hover:opacity-100 transition"
+                      title="Đặt làm ảnh đại diện"
+                    >
+                      ☆
+                    </button>
+                  )
+                )}
               </div>
             ))}
             <button
