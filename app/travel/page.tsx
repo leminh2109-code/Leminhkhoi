@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
@@ -10,6 +10,14 @@ import { formatDateRange } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function TravelPage() {
+  return (
+    <Suspense>
+      <TravelPageInner />
+    </Suspense>
+  );
+}
+
+function TravelPageInner() {
   const { status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
