@@ -21,8 +21,8 @@ export function NavBar() {
       {/* Desktop: sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col bg-white border-r border-gray-100 z-50 py-8 px-4">
         <div className="mb-8 px-2">
-          <div className="w-11 h-11 rounded-2xl bg-[#534AB7] flex items-center justify-center text-2xl mb-3">
-            👶
+          <div className="w-11 h-11 rounded-2xl overflow-hidden mb-3 flex-shrink-0">
+            <img src="/khoi-face.jpeg" alt="Khôi" className="w-full h-full object-cover object-center" />
           </div>
           <p className="font-semibold text-gray-900 text-sm leading-tight">Nhật ký Khôi</p>
           <p className="text-xs text-gray-400 mt-0.5">Lê Minh Khôi</p>
