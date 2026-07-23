@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Nhật ký Khôi",
   },
   icons: {
-    apple: "/khoi-face.jpeg",
+    apple: "/khoi-icon.png",
   },
 };
 
