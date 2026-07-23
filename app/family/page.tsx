@@ -25,18 +25,46 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function FamilyPage() {
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [allEntries, setAllEntries] = useState<Entry[]>([]);
   const [tab, setTab] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [showCountriesModal, setShowCountriesModal] = useState(false);
   const [selected, setSelected] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    const url = tab ? `/api/family?type=${tab}` : "/api/family";
-    fetch(url)
+    fetch("/api/family")
       .then((r) => r.json())
-      .then((data) => { setEntries(data); setLoading(false); });
-  }, [tab]);
+      .then((data) => { setAllEntries(data); setLoading(false); });
+  }, []);
+
+  // Client-side filtering
+  const displayedEntries = allEntries.filter((e) => {
+    if (tab && e.type !== tab) return false;
+    if (countryFilter && (e.type !== "TRAVEL" || String(e.metadata.country || "") !== countryFilter)) return false;
+    return true;
+  });
+
+  // Stats from all entries
+  const travelEntries = allEntries.filter((e) => e.type === "TRAVEL");
+  const countryBreakdown = travelEntries.reduce<Record<string, number>>((acc, e) => {
+    const c = String(e.metadata.country || "").trim();
+    if (c) acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
+  const uniqueCountries = Object.keys(countryBreakdown).length;
+
+  function handleCountryClick(country: string) {
+    setCountryFilter(country);
+    setTab("TRAVEL");
+    setShowCountriesModal(false);
+  }
+
+  function clearCountryFilter() {
+    setCountryFilter("");
+    setTab("");
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,6 +109,36 @@ export default function FamilyPage() {
         </div>
       )}
 
+      {/* Countries modal */}
+      {showCountriesModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end bg-black/30"
+          onClick={() => setShowCountriesModal(false)}
+        >
+          <div
+            className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
+            <div className="space-y-2">
+              {Object.entries(countryBreakdown)
+                .sort((a, b) => b[1] - a[1])
+                .map(([country, count]) => (
+                  <button
+                    key={country}
+                    onClick={() => handleCountryClick(country)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition text-left"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{country}</span>
+                    <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero header */}
       <div className="bg-[#534AB7] px-4 pt-10 pb-6">
         <div className="max-w-lg mx-auto">
@@ -102,17 +160,23 @@ export default function FamilyPage() {
 
       {/* Stats bar */}
       <div className="bg-white border-b border-gray-100 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center justify-around text-center">
+        <div className="max-w-lg mx-auto grid grid-cols-5 text-center">
           {[
-            { label: "Kỷ niệm", value: entries.filter(e => e.type === "MEMORY").length, color: "text-amber-500" },
-            { label: "Du lịch", value: entries.filter(e => e.type === "TRAVEL").length, color: "text-teal-500" },
-            { label: "Học tập", value: entries.filter(e => ["EDUCATION","SKILL","SCHOOL"].includes(e.type)).length, color: "text-purple-500" },
-            { label: "Bạn bè", value: entries.filter(e => e.type === "FRIEND").length, color: "text-pink-500" },
+            { label: "Kỷ niệm", value: allEntries.filter(e => e.type === "MEMORY").length, color: "text-amber-500", onClick: undefined },
+            { label: "Du lịch", value: travelEntries.length, color: "text-teal-500", onClick: undefined },
+            { label: "Quốc gia", value: uniqueCountries || "–", color: "text-teal-400", onClick: uniqueCountries > 0 ? () => setShowCountriesModal(true) : undefined },
+            { label: "Học tập", value: allEntries.filter(e => ["EDUCATION","SKILL","SCHOOL"].includes(e.type)).length, color: "text-purple-500", onClick: undefined },
+            { label: "Bạn bè", value: allEntries.filter(e => e.type === "FRIEND").length, color: "text-pink-500", onClick: undefined },
           ].map(s => (
-            <div key={s.label}>
+            <button
+              key={s.label}
+              onClick={s.onClick}
+              disabled={!s.onClick}
+              className="py-1 disabled:cursor-default"
+            >
               <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-gray-400">{s.label}</p>
-            </div>
+              <p className="text-[10px] text-gray-400 leading-tight">{s.label}</p>
+            </button>
           ))}
         </div>
       </div>
@@ -120,12 +184,20 @@ export default function FamilyPage() {
       {/* Tabs */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-lg mx-auto overflow-x-auto scrollbar-hide flex gap-1 px-3 py-2">
+          {countryFilter && (
+            <button
+              onClick={clearCountryFilter}
+              className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-teal-500 text-white"
+            >
+              {countryFilter} ✕
+            </button>
+          )}
           {TYPE_TABS.map(t => (
             <button
               key={t.value}
-              onClick={() => setTab(t.value)}
+              onClick={() => { setTab(t.value); setCountryFilter(""); }}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                tab === t.value
+                tab === t.value && !countryFilter
                   ? "bg-[#534AB7] text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
@@ -143,14 +215,14 @@ export default function FamilyPage() {
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 rounded-full border-2 border-[#534AB7] border-t-transparent animate-spin" />
           </div>
-        ) : entries.length === 0 ? (
+        ) : displayedEntries.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-3xl mb-2">📝</p>
             <p className="text-gray-400">Chưa có mục nào</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {entries.map((entry) => (
+            {displayedEntries.map((entry) => (
               <button
                 key={entry.id}
                 onClick={() => setSelected(entry)}
