@@ -48,7 +48,7 @@ export default function DashboardPage() {
     memories: entries.filter((e) => e.type === "MEMORY").length,
     travel: entries.filter((e) => e.type === "TRAVEL").length,
     skills: entries.filter((e) => e.type === "SKILL" || e.type === "EDUCATION").length,
-    books: entries.filter((e) => e.type === "BOOK").length,
+    friends: entries.filter((e) => e.type === "FRIEND").length,
   };
 
   const TYPE_COLORS: Record<string, string> = {
@@ -58,6 +58,7 @@ export default function DashboardPage() {
     EDUCATION: "bg-purple-50",
     BOOK: "bg-amber-50",
     SCHOOL: "bg-purple-50",
+    FRIEND: "bg-pink-50",
   };
 
   if (status === "loading" || loading) {
@@ -167,7 +168,7 @@ export default function DashboardPage() {
             { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600" },
             { label: "Du lịch", value: stats.travel, color: "text-teal-600" },
             { label: "Kỹ năng", value: stats.skills, color: "text-purple-600" },
-            { label: "Sách", value: stats.books, color: "text-amber-400" },
+            { label: "Bạn bè", value: stats.friends, color: "text-pink-500" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl p-3 border border-gray-100 text-center">
               <p className={`text-2xl font-semibold ${s.color}`}>{s.value}</p>

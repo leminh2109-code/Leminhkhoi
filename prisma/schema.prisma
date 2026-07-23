@@ -40,4 +40,6 @@ enum EntryType {
   BOOK
   SKILL
   SCHOOL
+  FRIEND
+  HEALTH
 }

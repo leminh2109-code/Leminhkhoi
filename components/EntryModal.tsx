@@ -16,6 +16,8 @@ const typeOptions: EntryTypeOption[] = [
   { value: "SKILL", label: "Kỹ năng", emoji: "🎯" },
   { value: "BOOK", label: "Sách", emoji: "📖" },
   { value: "SCHOOL", label: "Trường học", emoji: "🏫" },
+  { value: "FRIEND", label: "Bạn bè", emoji: "👫" },
+  { value: "HEALTH", label: "Sức khỏe", emoji: "🏥" },
 ];
 
 interface EntryModalProps {
@@ -257,6 +259,101 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
               placeholder="Tên tác giả"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
             />
+          </div>
+        )}
+
+        {type === "FRIEND" && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Địa chỉ</label>
+              <input
+                value={metadata.address || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, address: e.target.value }))}
+                placeholder="Số nhà, đường, quận, thành phố..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Bố</label>
+              <input
+                value={metadata.fatherName || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, fatherName: e.target.value }))}
+                placeholder="Tên bố của bạn"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Mẹ</label>
+              <input
+                value={metadata.motherName || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, motherName: e.target.value }))}
+                placeholder="Tên mẹ của bạn"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Số điện thoại <span className="font-normal text-gray-300">(tùy chọn)</span></label>
+              <input
+                value={metadata.phone || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, phone: e.target.value }))}
+                placeholder="0901 234 567"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+          </div>
+        )}
+
+        {type === "HEALTH" && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Chiều cao (cm)</label>
+                <input
+                  type="number"
+                  value={metadata.height || ""}
+                  onChange={(e) => setMetadata((m) => ({ ...m, height: e.target.value }))}
+                  placeholder="105"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Cân nặng (kg)</label>
+                <input
+                  type="number"
+                  value={metadata.weight || ""}
+                  onChange={(e) => setMetadata((m) => ({ ...m, weight: e.target.value }))}
+                  placeholder="18"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Bác sĩ / Cơ sở y tế</label>
+              <input
+                value={metadata.doctor || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, doctor: e.target.value }))}
+                placeholder="BS. Nguyễn Văn A — BV Nhi Đồng"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Chẩn đoán / Lý do khám</label>
+              <input
+                value={metadata.diagnosis || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, diagnosis: e.target.value }))}
+                placeholder="Khám định kỳ, sốt, tiêm vaccine..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Thuốc <span className="font-normal text-gray-300">(tùy chọn)</span></label>
+              <input
+                value={metadata.medication || ""}
+                onChange={(e) => setMetadata((m) => ({ ...m, medication: e.target.value }))}
+                placeholder="Paracetamol 250mg, vitamin D..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
           </div>
         )}
 
