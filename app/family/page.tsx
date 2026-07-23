@@ -95,7 +95,7 @@ export default function FamilyPage() {
             </div>
           </div>
           <p className="text-purple-200 text-sm leading-relaxed">
-            ✨ Đây là nhật ký hành trình lớn lên của Khôi — được Ba Mẹ lưu lại để chia sẻ cùng gia đình.
+            ✨ Đây là nhật ký hành trình lớn lên của Khôi — được Bố Mẹ lưu lại để chia sẻ cùng gia đình.
           </p>
         </div>
       </div>

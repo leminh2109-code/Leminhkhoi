@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 
-// Chỉ dùng 1 lần để tạo tài khoản Ba và Mẹ
+// Chỉ dùng 1 lần để tạo tài khoản Bố và Mẹ
 export async function POST(req: NextRequest) {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not allowed in production" }, { status: 403 });
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const ba = await prisma.user.upsert({
     where: { email: "ba@khoi.family" },
     update: { password: baHash },
-    create: { name: "Ba", email: "ba@khoi.family", password: baHash },
+    create: { name: "Bố", email: "ba@khoi.family", password: baHash },
   });
 
   const me = await prisma.user.upsert({
