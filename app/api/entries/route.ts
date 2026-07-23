@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 
 const createSchema = z.object({
-  type: z.enum(["MEMORY", "TRAVEL", "EDUCATION", "BOOK", "SKILL", "SCHOOL"]),
+  type: z.enum(["MEMORY", "TRAVEL", "EDUCATION", "BOOK", "SKILL", "SCHOOL", "FRIEND", "HEALTH"]),
   title: z.string().min(1),
   description: z.string().optional(),
   date: z.string(),
