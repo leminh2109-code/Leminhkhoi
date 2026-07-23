@@ -17,6 +17,18 @@ export default function DashboardPage() {
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  async function handleShare() {
+    const url = `${window.location.origin}/family`;
+    if (navigator.share) {
+      try { await navigator.share({ title: "Nhật ký Khôi", url }); } catch {}
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
+  }
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -141,12 +153,22 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-semibold text-gray-900">Nhật ký Khôi</h1>
             <p className="text-base text-gray-400 mt-0.5">Xin chào, {session?.user?.name} 👋</p>
           </div>
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="text-sm text-gray-400 hover:text-gray-600 transition"
-          >
-            Đăng xuất
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleShare}
+              className="md:hidden flex items-center gap-1.5 text-sm text-purple-500 font-medium"
+              title="Chia sẻ với gia đình"
+            >
+              <span className="text-base">🔗</span>
+              <span>{shareCopied ? "Đã copy!" : "Chia sẻ"}</span>
+            </button>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-sm text-gray-400 hover:text-gray-600 transition"
+            >
+              Đăng xuất
+            </button>
+          </div>
         </div>
 
         {/* Hero card */}
