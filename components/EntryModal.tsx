@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { EntryType, Entry } from "@/lib/types";
+import { TRAVEL_DATA, COUNTRY_LIST } from "@/lib/travel-data";
 import toast from "react-hot-toast";
 
 type EntryTypeOption = {
@@ -50,6 +51,18 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Travel: derive whether current stored values are "custom" (not in predefined lists)
+  const initCountry = entry?.metadata?.country as string | undefined;
+  const [customCountryMode, setCustomCountryMode] = useState(
+    !!initCountry && !COUNTRY_LIST.includes(initCountry)
+  );
+  const [customCityMode, setCustomCityMode] = useState(() => {
+    if (!initCountry || !COUNTRY_LIST.includes(initCountry)) return false;
+    const loc = entry?.metadata?.location as string | undefined;
+    const cities = TRAVEL_DATA[initCountry] || [];
+    return !!loc && cities.length > 0 && !cities.includes(loc);
+  });
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -190,37 +203,110 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
         </div>
 
         {/* Extra fields by type */}
-        {type === "TRAVEL" && (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Địa điểm</label>
-              <input
-                value={metadata.location || ""}
-                onChange={(e) => setMetadata((m) => ({ ...m, location: e.target.value }))}
-                placeholder="Đà Nẵng, Việt Nam"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
-              />
+        {type === "TRAVEL" && (() => {
+          const countryVal = metadata.country || "";
+          const countrySelectVal = customCountryMode ? "Khác" : countryVal;
+          const availableCities = (!customCountryMode && countryVal) ? (TRAVEL_DATA[countryVal] || []) : [];
+          const locationVal = metadata.location || "";
+          const citySelectVal = customCityMode ? "Khác" : locationVal;
+
+          return (
+            <div className="space-y-3">
+              {/* Country */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Quốc gia</label>
+                <select
+                  value={countrySelectVal}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "Khác") {
+                      setCustomCountryMode(true);
+                      setCustomCityMode(false);
+                      setMetadata((m) => ({ ...m, country: "", location: "" }));
+                    } else {
+                      setCustomCountryMode(false);
+                      setCustomCityMode(false);
+                      setMetadata((m) => ({ ...m, country: val, location: "" }));
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
+                >
+                  <option value="">-- Chọn quốc gia --</option>
+                  {COUNTRY_LIST.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  <option value="Khác">Khác</option>
+                </select>
+                {customCountryMode && (
+                  <input
+                    value={countryVal}
+                    onChange={(e) => setMetadata((m) => ({ ...m, country: e.target.value }))}
+                    placeholder="Nhập tên quốc gia"
+                    className="w-full mt-2 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                    autoFocus
+                  />
+                )}
+              </div>
+
+              {/* City / Province */}
+              {(countryVal || customCountryMode) && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Thành phố / Tỉnh</label>
+                  {availableCities.length > 0 ? (
+                    <>
+                      <select
+                        value={citySelectVal}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "Khác") {
+                            setCustomCityMode(true);
+                            setMetadata((m) => ({ ...m, location: "" }));
+                          } else {
+                            setCustomCityMode(false);
+                            setMetadata((m) => ({ ...m, location: val }));
+                          }
+                        }}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
+                      >
+                        <option value="">-- Chọn thành phố / tỉnh --</option>
+                        {availableCities.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                        <option value="Khác">Khác</option>
+                      </select>
+                      {customCityMode && (
+                        <input
+                          value={locationVal}
+                          onChange={(e) => setMetadata((m) => ({ ...m, location: e.target.value }))}
+                          placeholder="Nhập tên thành phố / tỉnh"
+                          className="w-full mt-2 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                          autoFocus
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <input
+                      value={locationVal}
+                      onChange={(e) => setMetadata((m) => ({ ...m, location: e.target.value }))}
+                      placeholder="Nhập thành phố, tỉnh..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                    />
+                  )}
+                </div>
+              )}
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={metadata.isFirstTime === "true"}
+                  onChange={(e) => setMetadata((m) => ({ ...m, isFirstTime: e.target.checked ? "true" : "false" }))}
+                  className="w-4 h-4 accent-purple-600"
+                />
+                <span className="text-sm text-gray-700">Lần đầu đến đây</span>
+              </label>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Quốc gia</label>
-              <input
-                value={String(metadata.country || "")}
-                onChange={(e) => setMetadata((m) => ({ ...m, country: e.target.value }))}
-                placeholder="Việt Nam"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
-              />
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={metadata.isFirstTime === "true"}
-                onChange={(e) => setMetadata((m) => ({ ...m, isFirstTime: e.target.checked ? "true" : "false" }))}
-                className="w-4 h-4 accent-purple-600"
-              />
-              <span className="text-sm text-gray-700">Lần đầu đến đây</span>
-            </label>
-          </div>
-        )}
+          );
+        })()}
 
         {type === "SKILL" && (
           <div>
