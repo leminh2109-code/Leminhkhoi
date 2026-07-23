@@ -84,7 +84,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="font-semibold text-lg leading-tight">Lê Minh Khôi</p>
-              <p className="text-purple-200 text-sm">{getKhoiAge()} · Sinh 22/6/2022</p>
+              <p className="text-purple-200 text-sm">{getKhoiAge()} · Sinh 6/2/2022</p>
             </div>
           </div>
         </div>

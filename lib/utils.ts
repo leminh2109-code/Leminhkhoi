@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-export const KHOI_BIRTHDAY = new Date("2022-06-22");
+export const KHOI_BIRTHDAY = new Date("2022-02-06");
 
 export function getKhoiAge() {
   const now = new Date();
