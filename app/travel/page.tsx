@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
@@ -12,6 +12,8 @@ import toast from "react-hot-toast";
 export default function TravelPage() {
   const { status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const countryFilter = searchParams.get("country");
   const [entries, setEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
@@ -40,7 +42,11 @@ export default function TravelPage() {
     }
   }
 
-  const uniqueLocations = new Set(entries.map((e) => String(e.metadata.location || "")).filter(Boolean)).size;
+  const displayedEntries = countryFilter
+    ? entries.filter((e) => String(e.metadata.country || "") === countryFilter)
+    : entries;
+
+  const uniqueLocations = new Set(displayedEntries.map((e) => String(e.metadata.location || "")).filter(Boolean)).size;
   const uniqueCountries = new Set(entries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size;
 
   return (
@@ -56,7 +62,17 @@ export default function TravelPage() {
 
       <div className="px-4 pt-6">
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-xl font-semibold text-gray-900">Du lịch</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-gray-900">Du lịch</h1>
+            {countryFilter && (
+              <button
+                onClick={() => router.push("/travel")}
+                className="flex items-center gap-1 px-2.5 py-1 bg-teal-50 text-teal-600 rounded-full text-xs font-medium"
+              >
+                {countryFilter} ✕
+              </button>
+            )}
+          </div>
           <button
             onClick={() => setShowModal(true)}
             className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-lg font-light"
@@ -85,17 +101,21 @@ export default function TravelPage() {
           </div>
         )}
 
-        {entries.length === 0 ? (
+        {displayedEntries.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
             <p className="text-3xl mb-2">✈️</p>
-            <p className="text-sm text-gray-400">Chưa có chuyến đi nào</p>
-            <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-teal-600 font-medium">
-              Thêm chuyến đi đầu tiên →
-            </button>
+            <p className="text-sm text-gray-400">
+              {countryFilter ? `Chưa có chuyến đi nào tại ${countryFilter}` : "Chưa có chuyến đi nào"}
+            </p>
+            {!countryFilter && (
+              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-teal-600 font-medium">
+                Thêm chuyến đi đầu tiên →
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
-            {entries.map((entry) => (
+            {displayedEntries.map((entry) => (
               <div key={entry.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 {entry.images[0] ? (
                   <img src={entry.images[0]} alt={entry.title} className="w-full h-40 object-cover" />

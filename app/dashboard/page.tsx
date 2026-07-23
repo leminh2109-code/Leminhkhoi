@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [travelEntries, setTravelEntries] = useState<Entry[]>([]);
+  const [showCountriesModal, setShowCountriesModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
@@ -73,6 +74,12 @@ export default function DashboardPage() {
     friends: entries.filter((e) => e.type === "FRIEND").length,
     countries: new Set(travelEntries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size,
   };
+
+  const countryBreakdown = travelEntries.reduce<Record<string, number>>((acc, e) => {
+    const c = String(e.metadata.country || "").trim();
+    if (c) acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
 
   const TYPE_COLORS: Record<string, string> = {
     MEMORY: "bg-coral-50",
@@ -200,7 +207,6 @@ export default function DashboardPage() {
           {[
             { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600", href: "/memories" },
             { label: "Du lịch", value: stats.travel, color: "text-teal-600", href: "/travel" },
-            { label: "Quốc gia", value: stats.countries || "–", color: "text-teal-500", href: "/travel" },
             { label: "Kỹ năng", value: stats.skills, color: "text-purple-600", href: "/education" },
             { label: "Bạn bè", value: stats.friends, color: "text-pink-500", href: "/friends" },
           ].map((s) => (
@@ -213,7 +219,45 @@ export default function DashboardPage() {
               <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{s.label}</p>
             </Link>
           ))}
+          <button
+            onClick={() => stats.countries > 0 && setShowCountriesModal(true)}
+            className="bg-white rounded-xl p-2 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
+          >
+            <p className="text-xl font-semibold text-teal-500">{stats.countries || "–"}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">Quốc gia</p>
+          </button>
         </div>
+
+        {/* Countries modal */}
+        {showCountriesModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-end bg-black/30"
+            onClick={() => setShowCountriesModal(false)}
+          >
+            <div
+              className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+              <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
+              <div className="space-y-2">
+                {Object.entries(countryBreakdown)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([country, count]) => (
+                    <Link
+                      key={country}
+                      href={`/travel?country=${encodeURIComponent(country)}`}
+                      onClick={() => setShowCountriesModal(false)}
+                      className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition"
+                    >
+                      <span className="text-sm font-medium text-gray-700">{country}</span>
+                      <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Recent */}
         <div className="flex items-center justify-between mb-3">
