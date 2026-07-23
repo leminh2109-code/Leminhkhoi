@@ -79,8 +79,8 @@ export default function DashboardPage() {
         {/* Hero card */}
         <div className="bg-purple-600 rounded-2xl p-5 mb-5 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center text-3xl">
-              👦
+            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/30">
+              <img src="/khoi.jpg" alt="Khôi" className="w-full h-full object-cover object-top" />
             </div>
             <div>
               <p className="font-semibold text-lg leading-tight">Lê Minh Khôi</p>
