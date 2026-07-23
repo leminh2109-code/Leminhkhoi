@@ -201,6 +201,15 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
               />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Quốc gia</label>
+              <input
+                value={String(metadata.country || "")}
+                onChange={(e) => setMetadata((m) => ({ ...m, country: e.target.value }))}
+                placeholder="Việt Nam"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              />
+            </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"

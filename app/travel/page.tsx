@@ -40,7 +40,8 @@ export default function TravelPage() {
     }
   }
 
-  const firstTimePlaces = entries.filter((e) => e.metadata.isFirstTime === true || e.metadata.isFirstTime === "true");
+  const uniqueLocations = new Set(entries.map((e) => String(e.metadata.location || "")).filter(Boolean)).size;
+  const uniqueCountries = new Set(entries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size;
 
   return (
     <PageShell>
@@ -67,14 +68,18 @@ export default function TravelPage() {
         {/* Summary */}
         {entries.length > 0 && (
           <div className="bg-teal-600 rounded-2xl p-4 mb-5 text-white">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <p className="text-3xl font-semibold">{entries.length}</p>
-                <p className="text-teal-200 text-xs mt-0.5">Nơi đã đến</p>
+                <p className="text-teal-200 text-xs mt-0.5">Số chuyến</p>
               </div>
               <div>
-                <p className="text-3xl font-semibold">{firstTimePlaces.length}</p>
-                <p className="text-teal-200 text-xs mt-0.5">Lần đầu tiên</p>
+                <p className="text-3xl font-semibold">{uniqueLocations || "–"}</p>
+                <p className="text-teal-200 text-xs mt-0.5">Địa điểm</p>
+              </div>
+              <div>
+                <p className="text-3xl font-semibold">{uniqueCountries || "–"}</p>
+                <p className="text-teal-200 text-xs mt-0.5">Quốc gia</p>
               </div>
             </div>
           </div>

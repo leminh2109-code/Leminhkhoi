@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
@@ -187,15 +188,19 @@ export default function DashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-2 mb-6">
           {[
-            { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600" },
-            { label: "Du lịch", value: stats.travel, color: "text-teal-600" },
-            { label: "Kỹ năng", value: stats.skills, color: "text-purple-600" },
-            { label: "Bạn bè", value: stats.friends, color: "text-pink-500" },
+            { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600", href: "/memories" },
+            { label: "Du lịch", value: stats.travel, color: "text-teal-600", href: "/travel" },
+            { label: "Kỹ năng", value: stats.skills, color: "text-purple-600", href: "/education" },
+            { label: "Bạn bè", value: stats.friends, color: "text-pink-500", href: "/friends" },
           ].map((s) => (
-            <div key={s.label} className="bg-white rounded-xl p-3 border border-gray-100 text-center">
+            <Link
+              key={s.label}
+              href={s.href}
+              className="bg-white rounded-xl p-3 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
+            >
               <p className={`text-2xl font-semibold ${s.color}`}>{s.value}</p>
               <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
-            </div>
+            </Link>
           ))}
         </div>
 
