@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [travelEntries, setTravelEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
@@ -41,6 +42,11 @@ export default function DashboardPage() {
     setLoading(false);
   }
 
+  async function fetchTravelEntries() {
+    const res = await fetch("/api/entries?type=TRAVEL");
+    if (res.ok) setTravelEntries(await res.json());
+  }
+
   async function deleteEntry(id: string) {
     if (!window.confirm("Xóa mục này?")) return;
     const res = await fetch(`/api/entries/${id}`, { method: "DELETE" });
@@ -54,7 +60,10 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    if (status === "authenticated") fetchEntries();
+    if (status === "authenticated") {
+      fetchEntries();
+      fetchTravelEntries();
+    }
   }, [status]);
 
   const stats = {
@@ -62,6 +71,7 @@ export default function DashboardPage() {
     travel: entries.filter((e) => e.type === "TRAVEL").length,
     skills: entries.filter((e) => e.type === "SKILL" || e.type === "EDUCATION").length,
     friends: entries.filter((e) => e.type === "FRIEND").length,
+    countries: new Set(travelEntries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size,
   };
 
   const TYPE_COLORS: Record<string, string> = {
@@ -186,20 +196,21 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        <div className="grid grid-cols-5 gap-1.5 mb-6">
           {[
             { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600", href: "/memories" },
             { label: "Du lịch", value: stats.travel, color: "text-teal-600", href: "/travel" },
+            { label: "Quốc gia", value: stats.countries || "–", color: "text-teal-500", href: "/travel" },
             { label: "Kỹ năng", value: stats.skills, color: "text-purple-600", href: "/education" },
             { label: "Bạn bè", value: stats.friends, color: "text-pink-500", href: "/friends" },
           ].map((s) => (
             <Link
               key={s.label}
               href={s.href}
-              className="bg-white rounded-xl p-3 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
+              className="bg-white rounded-xl p-2 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
             >
-              <p className={`text-2xl font-semibold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{s.label}</p>
             </Link>
           ))}
         </div>
