@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [allEntries, setAllEntries] = useState<Entry[]>([]);
   const [travelEntries, setTravelEntries] = useState<Entry[]>([]);
   const [showCountriesModal, setShowCountriesModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -38,14 +39,17 @@ export default function DashboardPage() {
   }, [status, router]);
 
   async function fetchEntries() {
-    const res = await fetch("/api/entries?limit=10");
-    if (res.ok) setEntries(await res.json());
+    const [recentRes, allRes] = await Promise.all([
+      fetch("/api/entries?limit=10"),
+      fetch("/api/entries?limit=200"),
+    ]);
+    if (recentRes.ok) setEntries(await recentRes.json());
+    if (allRes.ok) {
+      const all = await allRes.json();
+      setAllEntries(all);
+      setTravelEntries(all.filter((e: Entry) => e.type === "TRAVEL"));
+    }
     setLoading(false);
-  }
-
-  async function fetchTravelEntries() {
-    const res = await fetch("/api/entries?type=TRAVEL");
-    if (res.ok) setTravelEntries(await res.json());
   }
 
   async function deleteEntry(id: string) {
@@ -61,17 +65,14 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchEntries();
-      fetchTravelEntries();
-    }
+    if (status === "authenticated") fetchEntries();
   }, [status]);
 
   const stats = {
-    memories: entries.filter((e) => e.type === "MEMORY").length,
-    travel: entries.filter((e) => e.type === "TRAVEL").length,
-    skills: entries.filter((e) => e.type === "SKILL" || e.type === "EDUCATION").length,
-    friends: entries.filter((e) => e.type === "FRIEND").length,
+    memories: allEntries.filter((e) => e.type === "MEMORY").length,
+    travel: allEntries.filter((e) => e.type === "TRAVEL").length,
+    skills: allEntries.filter((e) => e.type === "SKILL" || e.type === "EDUCATION").length,
+    friends: allEntries.filter((e) => e.type === "FRIEND").length,
     countries: new Set(travelEntries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size,
   };
 
