@@ -28,6 +28,8 @@ function TravelPageInner() {
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [locationFilter, setLocationFilter] = useState("");
+  const [showLocationsModal, setShowLocationsModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -54,11 +56,18 @@ function TravelPageInner() {
     }
   }
 
-  const displayedEntries = countryFilter
-    ? entries.filter((e) => String(e.metadata.country || "") === countryFilter)
-    : entries;
+  const displayedEntries = entries.filter((e) => {
+    if (countryFilter && String(e.metadata.country || "") !== countryFilter) return false;
+    if (locationFilter && String(e.metadata.location || "") !== locationFilter) return false;
+    return true;
+  });
 
-  const uniqueLocations = new Set(displayedEntries.map((e) => String(e.metadata.location || "")).filter(Boolean)).size;
+  const locationBreakdown = entries.reduce<Record<string, number>>((acc, e) => {
+    const loc = String(e.metadata.location || "").trim();
+    if (loc) acc[loc] = (acc[loc] || 0) + 1;
+    return acc;
+  }, {});
+  const uniqueLocations = Object.keys(locationBreakdown).length;
   const uniqueCountries = new Set(entries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size;
 
   return (
@@ -72,6 +81,30 @@ function TravelPageInner() {
           onClose={() => { setShowModal(false); setEditingEntry(null); }}
           onSaved={() => { fetchEntries(); setSelected(null); }}
         />
+      )}
+
+      {/* Locations modal */}
+      {showLocationsModal && (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/30" onClick={() => setShowLocationsModal(false)}>
+          <div className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-gray-800 mb-3">📍 Địa điểm đã đến</h3>
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {Object.entries(locationBreakdown)
+                .sort((a, b) => b[1] - a[1])
+                .map(([loc, count]) => (
+                  <button
+                    key={loc}
+                    onClick={() => { setLocationFilter(loc); setShowLocationsModal(false); }}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition text-left"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{loc}</span>
+                    <span className="text-sm text-teal-600 font-semibold">{count} lần ›</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Detail view */}
@@ -139,7 +172,7 @@ function TravelPageInner() {
 
       <div className="px-4 pt-6">
         <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-semibold text-gray-900">Du lịch</h1>
             {countryFilter && (
               <button
@@ -147,6 +180,14 @@ function TravelPageInner() {
                 className="flex items-center gap-1 px-2.5 py-1 bg-teal-50 text-teal-600 rounded-full text-xs font-medium"
               >
                 {countryFilter} ✕
+              </button>
+            )}
+            {locationFilter && (
+              <button
+                onClick={() => setLocationFilter("")}
+                className="flex items-center gap-1 px-2.5 py-1 bg-teal-500 text-white rounded-full text-xs font-medium"
+              >
+                📍 {locationFilter} ✕
               </button>
             )}
           </div>
@@ -166,10 +207,14 @@ function TravelPageInner() {
                 <p className="text-3xl font-semibold">{entries.length}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Số chuyến</p>
               </div>
-              <div>
+              <button
+                onClick={() => uniqueLocations > 0 && setShowLocationsModal(true)}
+                className="disabled:cursor-default"
+                disabled={uniqueLocations === 0}
+              >
                 <p className="text-3xl font-semibold">{uniqueLocations || "–"}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Địa điểm</p>
-              </div>
+              </button>
               <div>
                 <p className="text-3xl font-semibold">{uniqueCountries || "–"}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Quốc gia</p>
