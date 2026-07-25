@@ -13,7 +13,9 @@ import toast from "react-hot-toast";
 export default function ProfilePage() {
   const { status } = useSession();
   const router = useRouter();
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [healthEntries, setHealthEntries] = useState<Entry[]>([]);
+  const [infoEntries, setInfoEntries] = useState<Entry[]>([]);
+  const [modalType, setModalType] = useState<"HEALTH" | "INFO">("HEALTH");
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
@@ -24,8 +26,12 @@ export default function ProfilePage() {
   }, [status, router]);
 
   async function fetchEntries() {
-    const res = await fetch("/api/entries?type=HEALTH");
-    if (res.ok) setEntries(await res.json());
+    const [healthRes, infoRes] = await Promise.all([
+      fetch("/api/entries?type=HEALTH"),
+      fetch("/api/entries?type=INFO"),
+    ]);
+    if (healthRes.ok) setHealthEntries(await healthRes.json());
+    if (infoRes.ok) setInfoEntries(await infoRes.json());
   }
 
   useEffect(() => {
@@ -44,15 +50,19 @@ export default function ProfilePage() {
     }
   }
 
-  // Lấy số đo mới nhất
-  const latestHeight = entries.find((e) => !!e.metadata.height);
-  const latestWeight = entries.find((e) => !!e.metadata.weight);
+  function openModal(type: "HEALTH" | "INFO") {
+    setModalType(type);
+    setShowModal(true);
+  }
+
+  const latestHeight = healthEntries.find((e) => !!e.metadata.height);
+  const latestWeight = healthEntries.find((e) => !!e.metadata.weight);
 
   return (
     <PageShell>
       {(showModal || editingEntry) && (
         <EntryModal
-          defaultType="HEALTH"
+          defaultType={editingEntry?.type ?? modalType}
           entry={editingEntry ?? undefined}
           onClose={() => { setShowModal(false); setEditingEntry(null); }}
           onSaved={fetchEntries}
@@ -86,18 +96,20 @@ export default function ProfilePage() {
 
           <div className="px-4 py-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center text-3xl flex-shrink-0">
-                {selected.emoji || "🏥"}
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 ${selected.type === "INFO" ? "bg-purple-50" : "bg-green-50"}`}>
+                {selected.emoji || (selected.type === "INFO" ? "📋" : "🏥")}
               </div>
               <div>
                 <p className="text-lg font-semibold text-gray-800">{selected.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {formatDateRangeLong(selected.date, selected.metadata.endDate as string)}
-                </p>
+                {selected.type === "HEALTH" && (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {formatDateRangeLong(selected.date, selected.metadata.endDate as string)}
+                  </p>
+                )}
               </div>
             </div>
 
-            {(!!selected.metadata.height || !!selected.metadata.weight) && (
+            {selected.type === "HEALTH" && (!!selected.metadata.height || !!selected.metadata.weight) && (
               <div className="flex gap-3">
                 {!!selected.metadata.height && (
                   <div className="flex-1 bg-green-50 rounded-2xl p-4 text-center">
@@ -114,7 +126,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {(!!selected.metadata.doctor || !!selected.metadata.diagnosis || !!selected.metadata.medication) && (
+            {selected.type === "HEALTH" && (!!selected.metadata.doctor || !!selected.metadata.diagnosis || !!selected.metadata.medication) && (
               <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
                 {!!selected.metadata.doctor && (
                   <div className="flex items-start gap-3">
@@ -168,7 +180,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Latest stats */}
           {(latestHeight || latestWeight) && (
             <div className="grid grid-cols-2 border-t border-white/10">
               {latestHeight && (
@@ -187,24 +198,59 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Health records */}
-        <div className="px-4">
+        {/* Thông tin cá nhân */}
+        <div className="px-4 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">🏥 Sức khỏe</h2>
-            <button onClick={() => setShowModal(true)} className="text-sm text-green-600 font-medium">+ Thêm mới</button>
+            <h2 className="text-sm font-semibold text-gray-700">📋 Thông tin cá nhân</h2>
+            <button onClick={() => openModal("INFO")} className="text-sm text-purple-600 font-medium">+ Thêm</button>
           </div>
 
-          {entries.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          {infoEntries.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+              <p className="text-3xl mb-2">📋</p>
+              <p className="text-sm text-gray-400">Chưa có thông tin nào</p>
+              <p className="text-xs text-gray-300 mt-1">VD: màu yêu thích, món ăn, sở thích...</p>
+              <button onClick={() => openModal("INFO")} className="mt-3 text-sm text-purple-600 font-medium">
+                Thêm thông tin →
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {infoEntries.map((entry) => (
+                <button
+                  key={entry.id}
+                  onClick={() => setSelected(entry)}
+                  className="bg-white rounded-2xl border border-gray-100 p-3.5 text-left active:bg-gray-50 transition"
+                >
+                  <span className="text-2xl">{entry.emoji || "📌"}</span>
+                  <p className="text-xs font-semibold text-gray-700 mt-2 leading-snug">{entry.title}</p>
+                  {entry.description && (
+                    <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">{entry.description}</p>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Cập nhật sức khỏe */}
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700">🏥 Cập nhật sức khỏe</h2>
+            <button onClick={() => openModal("HEALTH")} className="text-sm text-green-600 font-medium">+ Cập nhật</button>
+          </div>
+
+          {healthEntries.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
               <p className="text-3xl mb-2">🏥</p>
-              <p className="text-sm text-gray-400">Chưa có mục sức khỏe nào</p>
-              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-green-600 font-medium">
-                Thêm lần khám đầu tiên →
+              <p className="text-sm text-gray-400">Chưa có dữ liệu sức khỏe</p>
+              <button onClick={() => openModal("HEALTH")} className="mt-3 text-sm text-green-600 font-medium">
+                Cập nhật sức khỏe đầu tiên →
               </button>
             </div>
           ) : (
             <div className="space-y-1.5">
-              {entries.map((entry) => (
+              {healthEntries.map((entry) => (
                 <button
                   key={entry.id}
                   onClick={() => setSelected(entry)}

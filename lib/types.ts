@@ -1,4 +1,4 @@
-export type EntryType = "MEMORY" | "TRAVEL" | "EDUCATION" | "BOOK" | "SKILL" | "SCHOOL" | "FRIEND" | "HEALTH";
+export type EntryType = "MEMORY" | "TRAVEL" | "EDUCATION" | "BOOK" | "SKILL" | "SCHOOL" | "FRIEND" | "HEALTH" | "INFO";
 
 export interface Entry {
   id: string;

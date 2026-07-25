@@ -19,6 +19,7 @@ const typeOptions: EntryTypeOption[] = [
   { value: "SCHOOL", label: "Trường học", emoji: "🏫" },
   { value: "FRIEND", label: "Bạn bè", emoji: "👫" },
   { value: "HEALTH", label: "Sức khỏe", emoji: "🏥" },
+  { value: "INFO", label: "Thông tin cá nhân", emoji: "📋" },
 ];
 
 interface EntryModalProps {

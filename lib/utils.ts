@@ -45,6 +45,7 @@ export const ENTRY_TYPE_LABELS: Record<string, string> = {
   SCHOOL: "Trường học",
   FRIEND: "Bạn bè",
   HEALTH: "Sức khỏe",
+  INFO: "Thông tin",
 };
 
 export const ENTRY_TYPE_COLORS: Record<string, string> = {
