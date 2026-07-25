@@ -13,6 +13,7 @@ export default function FriendsPage() {
   const { status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [tripCounts, setTripCounts] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
@@ -22,13 +23,28 @@ export default function FriendsPage() {
   }, [status, router]);
 
   async function fetchEntries() {
-    const res = await fetch("/api/entries?type=FRIEND");
-    if (res.ok) setEntries(await res.json());
+    const [friendRes, travelRes] = await Promise.all([
+      fetch("/api/entries?type=FRIEND"),
+      fetch("/api/entries?type=TRAVEL"),
+    ]);
+    if (friendRes.ok) setEntries(await friendRes.json());
+    if (travelRes.ok) {
+      const travels: Entry[] = await travelRes.json();
+      const counts: Record<string, number> = {};
+      for (const t of travels) {
+        let companions: string[] = [];
+        try { companions = JSON.parse(String(t.metadata.companions || "[]")); } catch {}
+        for (const id of companions) counts[id] = (counts[id] || 0) + 1;
+      }
+      setTripCounts(counts);
+    }
   }
 
   useEffect(() => {
     if (status === "authenticated") fetchEntries();
   }, [status]);
+
+  const sortedEntries = [...entries].sort((a, b) => (tripCounts[b.id] || 0) - (tripCounts[a.id] || 0));
 
   async function deleteEntry(id: string) {
     if (!window.confirm("Xóa bạn này?")) return;
@@ -93,6 +109,11 @@ export default function FriendsPage() {
               <div>
                 <p className="text-lg font-semibold text-gray-800">{selected.title}</p>
                 <p className="text-xs text-gray-400 mt-0.5">Quen từ {formatDate(selected.date)}</p>
+                {(tripCounts[selected.id] || 0) > 0 && (
+                  <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">
+                    ✈️ Đã đi {tripCounts[selected.id]} chuyến cùng Khôi
+                  </span>
+                )}
               </div>
             </div>
 
@@ -162,12 +183,15 @@ export default function FriendsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {entries.map((entry) => (
+            {sortedEntries.map((entry, index) => (
               <div key={entry.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 <button
                   onClick={() => setSelected(entry)}
                   className="w-full p-4 flex items-center gap-3 text-left active:bg-gray-50 transition"
                 >
+                  <span className="text-sm font-bold text-gray-300 w-5 text-center flex-shrink-0">
+                    {index + 1}
+                  </span>
                   {entry.images[0] ? (
                     <img src={entry.images[0]} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
                   ) : (
@@ -186,6 +210,11 @@ export default function FriendsPage() {
                       </p>
                     )}
                   </div>
+                  {(tripCounts[entry.id] || 0) > 0 && (
+                    <span className="flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-50 text-teal-600">
+                      ✈️ {tripCounts[entry.id]} chuyến
+                    </span>
+                  )}
                 </button>
                 <div className="flex border-t border-gray-50">
                   <button

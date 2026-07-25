@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { EntryType, Entry } from "@/lib/types";
 import { TRAVEL_DATA, COUNTRY_LIST } from "@/lib/travel-data";
 import toast from "react-hot-toast";
@@ -50,7 +50,27 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
   const [images, setImages] = useState<string[]>(entry?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [friendEntries, setFriendEntries] = useState<Entry[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (type === "TRAVEL") {
+      fetch("/api/entries?type=FRIEND")
+        .then((r) => r.ok ? r.json() : [])
+        .then(setFriendEntries);
+    }
+  }, [type]);
+
+  const companions: string[] = (() => {
+    try { return JSON.parse(metadata.companions || "[]"); } catch { return []; }
+  })();
+
+  function toggleCompanion(id: string) {
+    const next = companions.includes(id)
+      ? companions.filter((c) => c !== id)
+      : [...companions, id];
+    setMetadata((m) => ({ ...m, companions: JSON.stringify(next) }));
+  }
 
   // Travel: derive whether current stored values are "custom" (not in predefined lists)
   const initCountry = entry?.metadata?.country as string | undefined;
@@ -292,6 +312,36 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
                     />
                   )}
+                </div>
+              )}
+
+              {friendEntries.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Đi cùng bạn</label>
+                  <div className="flex flex-wrap gap-2">
+                    {friendEntries.map((f) => {
+                      const checked = companions.includes(f.id);
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => toggleCompanion(f.id)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                            checked
+                              ? "bg-pink-500 text-white border-pink-500"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-pink-300"
+                          }`}
+                        >
+                          {f.images[0] ? (
+                            <img src={f.images[0]} alt="" className="w-4 h-4 rounded-full object-cover" />
+                          ) : (
+                            <span>{f.emoji || "👫"}</span>
+                          )}
+                          {f.title}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
