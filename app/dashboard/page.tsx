@@ -266,6 +266,9 @@ export default function DashboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-2">
                     <p className="text-white text-[10px] font-medium leading-tight line-clamp-2">{entry.title}</p>
+                    <p className="text-white/70 text-[9px] mt-0.5">
+                      {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
+                    </p>
                   </div>
                 </button>
               ))}
