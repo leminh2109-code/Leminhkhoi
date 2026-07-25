@@ -120,7 +120,7 @@ function TravelPageInner() {
                 {(selected.metadata.isFirstTime === true || selected.metadata.isFirstTime === "true") && (
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-teal-50 text-teal-600">Lần đầu ✨</span>
                 )}
-                {(selected.metadata.country) && (
+                {!!(selected.metadata.country) && (
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
                     🌏 {String(selected.metadata.country)}
                   </span>
