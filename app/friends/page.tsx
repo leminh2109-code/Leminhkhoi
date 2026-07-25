@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateRange } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
@@ -14,6 +14,7 @@ export default function FriendsPage() {
   const { status } = useSession();
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [travelEntries, setTravelEntries] = useState<Entry[]>([]);
   const [tripCounts, setTripCounts] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
@@ -32,6 +33,7 @@ export default function FriendsPage() {
     if (friendRes.ok) setEntries(await friendRes.json());
     if (travelRes.ok) {
       const travels: Entry[] = await travelRes.json();
+      setTravelEntries(travels);
       const counts: Record<string, number> = {};
       for (const t of travels) {
         let companions: string[] = [];
@@ -162,6 +164,41 @@ export default function FriendsPage() {
             {selected.description && (
               <p className="text-sm text-gray-600 leading-relaxed">{selected.description}</p>
             )}
+
+            {(() => {
+              const sharedTrips = travelEntries.filter((t) => {
+                try { return JSON.parse(String(t.metadata.companions || "[]")).includes(selected.id); } catch { return false; }
+              });
+              if (sharedTrips.length === 0) return null;
+              return (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">✈️ Chuyến đi cùng nhau</p>
+                  <div className="space-y-2">
+                    {sharedTrips.map((trip) => (
+                      <div key={trip.id} className="flex items-center gap-3 bg-teal-50 rounded-xl p-3">
+                        {trip.images[0] ? (
+                          <img src={trip.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center text-xl flex-shrink-0">
+                            {trip.emoji || "🗺️"}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 leading-snug">{trip.title}</p>
+                          {!!trip.metadata.location && (
+                            <p className="text-xs text-teal-600 mt-0.5">📍 {String(trip.metadata.location)}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {formatDateRange(trip.date, trip.metadata.endDate as string)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             <p className="text-xs text-gray-300">Ghi bởi {selected.author.name}</p>
           </div>
         </div>
