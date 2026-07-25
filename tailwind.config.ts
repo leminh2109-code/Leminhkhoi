@@ -46,7 +46,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["Calibri", "Carlito", "system-ui", "sans-serif"],
       },
       screens: {
         xs: "375px",
