@@ -7,6 +7,7 @@ import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
 import { formatDateRange } from "@/lib/utils";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
 export default function TravelPage() {
@@ -25,6 +26,7 @@ function TravelPageInner() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -59,6 +61,8 @@ function TravelPageInner() {
 
   return (
     <PageShell>
+      {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
+
       {(showModal || editingEntry) && (
         <EntryModal
           defaultType="TRAVEL"
@@ -126,7 +130,8 @@ function TravelPageInner() {
             {displayedEntries.map((entry) => (
               <div key={entry.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 {entry.images[0] ? (
-                  <img src={entry.images[0]} alt={entry.title} className="w-full h-40 object-cover" />
+                  <img src={entry.images[0]} alt={entry.title} className="w-full h-40 object-cover cursor-zoom-in"
+                    onClick={() => setLightbox({ images: entry.images, index: 0 })} />
                 ) : (
                   <div className="w-full h-28 bg-teal-50 flex items-center justify-center">
                     <span className="text-5xl">{entry.emoji || "🗺️"}</span>
@@ -155,7 +160,8 @@ function TravelPageInner() {
                   {entry.images.length > 1 && (
                     <div className="flex gap-1.5 mt-3 overflow-x-auto scrollbar-hide">
                       {entry.images.slice(1).map((img, i) => (
-                        <img key={i} src={img} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        <img key={i} src={img} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0 cursor-zoom-in"
+                          onClick={() => setLightbox({ images: entry.images, index: i + 1 })} />
                       ))}
                     </div>
                   )}

@@ -7,6 +7,7 @@ import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
 import { formatDateRangeLong } from "@/lib/utils";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
 export default function MemoriesPage() {
@@ -16,6 +17,7 @@ export default function MemoriesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -53,6 +55,8 @@ export default function MemoriesPage() {
         />
       )}
 
+      {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
+
       {/* Full-screen detail view */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
@@ -80,7 +84,8 @@ export default function MemoriesPage() {
           {selected.images.length > 0 && (
             <div className="overflow-x-auto scrollbar-hide flex gap-2 p-4">
               {selected.images.map((img, i) => (
-                <img key={i} src={img} alt="" className="h-56 rounded-xl object-cover flex-shrink-0" />
+                <img key={i} src={img} alt="" className="h-56 rounded-xl object-cover flex-shrink-0 cursor-zoom-in"
+                  onClick={() => setLightbox({ images: selected.images, index: i })} />
               ))}
             </div>
           )}

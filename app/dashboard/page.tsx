@@ -8,6 +8,7 @@ import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
 import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS } from "@/lib/utils";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
 export default function DashboardPage() {
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const [selected, setSelected] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(true);
   const [shareCopied, setShareCopied] = useState(false);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   async function handleShare() {
     const url = `${window.location.origin}/family`;
@@ -112,6 +114,8 @@ export default function DashboardPage() {
         />
       )}
 
+      {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
+
       {/* Detail view */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
@@ -139,7 +143,8 @@ export default function DashboardPage() {
           {selected.images.length > 0 && (
             <div className="overflow-x-auto scrollbar-hide flex gap-2 p-4">
               {selected.images.map((img, i) => (
-                <img key={i} src={img} alt="" className="h-56 rounded-xl object-cover flex-shrink-0" />
+                <img key={i} src={img} alt="" className="h-56 rounded-xl object-cover flex-shrink-0 cursor-zoom-in"
+                  onClick={() => setLightbox({ images: selected.images, index: i })} />
               ))}
             </div>
           )}

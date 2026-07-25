@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS } from "@/lib/utils";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import { Entry } from "@/lib/types";
 
 const TYPE_TABS = [
@@ -30,6 +31,7 @@ export default function FamilyPage() {
   const [countryFilter, setCountryFilter] = useState("");
   const [showCountriesModal, setShowCountriesModal] = useState(false);
   const [selected, setSelected] = useState<Entry | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,7 +85,8 @@ export default function FamilyPage() {
           {selected.images.length > 0 && (
             <div className="overflow-x-auto flex gap-2 p-4">
               {selected.images.map((img, i) => (
-                <img key={i} src={img} alt="" className="h-64 rounded-2xl object-cover flex-shrink-0 shadow-sm" />
+                <img key={i} src={img} alt="" className="h-64 rounded-2xl object-cover flex-shrink-0 shadow-sm cursor-zoom-in"
+                  onClick={() => setLightbox({ images: selected.images, index: i })} />
               ))}
             </div>
           )}
@@ -108,6 +111,8 @@ export default function FamilyPage() {
           </div>
         </div>
       )}
+
+      {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
 
       {/* Countries modal */}
       {showCountriesModal && (
