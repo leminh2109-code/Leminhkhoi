@@ -106,8 +106,11 @@ export default function DashboardPage() {
     return acc;
   }, {});
 
-  // Entries with photos for carousel
-  const photoEntries = entries.filter((e) => e.images.length > 0).slice(0, 10);
+  const travelSlide = allEntries.filter((e) => e.type === "TRAVEL").slice(0, 10);
+  const memoriesSlide = allEntries.filter((e) => e.type === "MEMORY").slice(0, 10);
+  const educationSlide = allEntries
+    .filter((e) => ["SKILL", "BOOK", "SCHOOL", "EDUCATION"].includes(e.type))
+    .slice(0, 10);
 
   if (status === "loading" || loading) {
     return (
@@ -248,28 +251,84 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Photo carousel */}
-        {photoEntries.length > 0 && (
+        {/* Du lịch carousel */}
+        {travelSlide.length > 0 && (
           <div className="mb-5">
             <div className="flex items-center justify-between px-4 mb-2">
-              <h2 className="text-sm font-semibold text-gray-700">📸 Ảnh gần đây</h2>
+              <h2 className="text-sm font-semibold text-gray-700">✈️ Du lịch</h2>
+              <Link href="/travel" className="text-xs text-teal-600 font-medium">Xem tất cả →</Link>
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
-              {photoEntries.map((entry) => (
-                <button
-                  key={entry.id}
-                  onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition"
-                  style={{ width: 120, height: 150 }}
-                >
-                  <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <p className="text-white text-[10px] font-medium leading-tight line-clamp-2">{entry.title}</p>
-                    <p className="text-white/70 text-[9px] mt-0.5">
+              {travelSlide.map((entry) => (
+                <button key={entry.id} onClick={() => setSelected(entry)}
+                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition bg-teal-50"
+                  style={{ width: 130, height: 165 }}>
+                  {entry.images[0]
+                    ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "🗺️"}</div>
+                  }
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                    <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">{entry.title}</p>
+                    {!!entry.metadata.location && (
+                      <p className="text-white/70 text-[9px] mt-0.5 truncate">📍 {String(entry.metadata.location)}</p>
+                    )}
+                    <p className="text-white/60 text-[9px] mt-0.5">
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                     </p>
                   </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Kỷ niệm carousel */}
+        {memoriesSlide.length > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center justify-between px-4 mb-2">
+              <h2 className="text-sm font-semibold text-gray-700">💛 Kỷ niệm</h2>
+              <Link href="/memories" className="text-xs text-amber-500 font-medium">Xem tất cả →</Link>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
+              {memoriesSlide.map((entry) => (
+                <button key={entry.id} onClick={() => setSelected(entry)}
+                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition bg-amber-50"
+                  style={{ width: 130, height: 165 }}>
+                  {entry.images[0]
+                    ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "💛"}</div>
+                  }
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                    <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">{entry.title}</p>
+                    <p className="text-white/60 text-[9px] mt-0.5">
+                      {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Học tập carousel */}
+        {educationSlide.length > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center justify-between px-4 mb-2">
+              <h2 className="text-sm font-semibold text-gray-700">📚 Học tập</h2>
+              <Link href="/education" className="text-xs text-purple-500 font-medium">Xem tất cả →</Link>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
+              {educationSlide.map((entry) => (
+                <button key={entry.id} onClick={() => setSelected(entry)}
+                  className="flex-shrink-0 rounded-2xl bg-white border border-gray-100 p-3 text-left active:bg-gray-50 transition flex flex-col gap-1.5"
+                  style={{ width: 150 }}>
+                  <span className="text-2xl">{entry.emoji || "📌"}</span>
+                  <p className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">{entry.title}</p>
+                  <p className="text-[10px] text-gray-400 mt-auto">
+                    {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
+                  </p>
                 </button>
               ))}
             </div>
