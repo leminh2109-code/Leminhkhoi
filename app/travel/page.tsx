@@ -26,6 +26,7 @@ function TravelPageInner() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const [selected, setSelected] = useState<Entry | null>(null);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ function TravelPageInner() {
     const res = await fetch(`/api/entries/${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Đã xóa");
+      setSelected(null);
       fetchEntries();
     } else {
       toast.error("Xóa thất bại");
@@ -68,8 +70,71 @@ function TravelPageInner() {
           defaultType="TRAVEL"
           entry={editingEntry ?? undefined}
           onClose={() => { setShowModal(false); setEditingEntry(null); }}
-          onSaved={fetchEntries}
+          onSaved={() => { fetchEntries(); setSelected(null); }}
         />
+      )}
+
+      {/* Detail view */}
+      {selected && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
+            <button onClick={() => setSelected(null)} className="text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
+            <button
+              onClick={() => { setEditingEntry(selected); setSelected(null); }}
+              className="text-sm text-purple-600 font-medium"
+            >
+              Sửa
+            </button>
+            <button
+              onClick={() => deleteEntry(selected.id)}
+              className="text-sm text-red-400 font-medium"
+            >
+              Xóa
+            </button>
+          </div>
+
+          {selected.images.length > 0 && (
+            <div className="overflow-x-auto scrollbar-hide flex gap-2 p-4">
+              {selected.images.map((img, i) => (
+                <img key={i} src={img} alt="" className="h-64 rounded-2xl object-cover flex-shrink-0 shadow-sm cursor-zoom-in"
+                  onClick={() => setLightbox({ images: selected.images, index: i })} />
+              ))}
+            </div>
+          )}
+
+          <div className="px-4 py-4 space-y-3">
+            <div>
+              <p className="text-xl font-semibold text-gray-900 leading-snug">{selected.title}</p>
+              {!!selected.metadata.location && (
+                <p className="text-sm text-teal-600 mt-1">📍 {String(selected.metadata.location)}</p>
+              )}
+              <p className="text-sm text-gray-400 mt-1">
+                {formatDateRange(selected.date, selected.metadata.endDate as string)}
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(selected.metadata.isFirstTime === true || selected.metadata.isFirstTime === "true") && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-teal-50 text-teal-600">Lần đầu ✨</span>
+                )}
+                {(selected.metadata.country) && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                    🌏 {String(selected.metadata.country)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {selected.description && (
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+            )}
+
+            <p className="text-xs text-gray-300 pt-2">Ghi bởi {selected.author.name}</p>
+          </div>
+        </div>
       )}
 
       <div className="px-4 pt-6">
@@ -128,60 +193,46 @@ function TravelPageInner() {
         ) : (
           <div className="space-y-3">
             {displayedEntries.map((entry) => (
-              <div key={entry.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <button
+                key={entry.id}
+                onClick={() => setSelected(entry)}
+                className="w-full bg-white rounded-xl border border-gray-100 overflow-hidden text-left active:bg-gray-50 transition flex items-center gap-3 p-3"
+              >
                 {entry.images[0] ? (
-                  <img src={entry.images[0]} alt={entry.title} className="w-full h-40 object-cover cursor-zoom-in"
-                    onClick={() => setLightbox({ images: entry.images, index: 0 })} />
+                  <img src={entry.images[0]} alt={entry.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-full h-28 bg-teal-50 flex items-center justify-center">
-                    <span className="text-5xl">{entry.emoji || "🗺️"}</span>
+                  <div className="w-20 h-20 rounded-xl bg-teal-50 flex items-center justify-center text-3xl flex-shrink-0">
+                    {entry.emoji || "🗺️"}
                   </div>
                 )}
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">{entry.title}</p>
-                      {!!entry.metadata.location && (
-                        <p className="text-xs text-teal-600 mt-0.5">📍 {String(entry.metadata.location)}</p>
-                      )}
-                      <p className="text-xs text-gray-400 mt-1">
-                        {formatDateRange(entry.date, entry.metadata.endDate as string)}
-                      </p>
-                    </div>
+                <div className="flex-1 min-w-0 py-0.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-800 leading-snug">{entry.title}</p>
                     {(entry.metadata.isFirstTime === true || entry.metadata.isFirstTime === "true") && (
-                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 flex-shrink-0">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-600 flex-shrink-0">
                         Lần đầu ✨
                       </span>
                     )}
                   </div>
+                  {!!entry.metadata.location && (
+                    <p className="text-xs text-teal-600 mt-0.5">📍 {String(entry.metadata.location)}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {formatDateRange(entry.date, entry.metadata.endDate as string)}
+                  </p>
                   {entry.description && (
-                    <p className="text-xs text-gray-500 mt-2 leading-relaxed">{entry.description}</p>
-                  )}
-                  {entry.images.length > 1 && (
-                    <div className="flex gap-1.5 mt-3 overflow-x-auto scrollbar-hide">
-                      {entry.images.slice(1).map((img, i) => (
-                        <img key={i} src={img} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0 cursor-zoom-in"
-                          onClick={() => setLightbox({ images: entry.images, index: i + 1 })} />
-                      ))}
-                    </div>
+                    <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">{entry.description}</p>
                   )}
                 </div>
-                <div className="flex border-t border-gray-50">
-                  <button
-                    onClick={() => setEditingEntry(entry)}
-                    className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
-                  >
-                    Sửa
-                  </button>
-                  <div className="w-px bg-gray-100" />
-                  <button
-                    onClick={() => deleteEntry(entry.id)}
-                    className="flex-1 py-2 text-xs text-red-400 font-medium hover:bg-red-50 transition"
-                  >
-                    Xóa
-                  </button>
-                </div>
-              </div>
+                {entry.images.length > 1 && (
+                  <span className="text-[11px] text-gray-300 flex-shrink-0 self-start mt-0.5">
+                    +{entry.images.length - 1}
+                  </span>
+                )}
+                <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             ))}
           </div>
         )}
