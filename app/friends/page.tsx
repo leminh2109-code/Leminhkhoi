@@ -207,7 +207,7 @@ export default function FriendsPage() {
             )}
 
             {selected.description && (
-              <p className="text-sm text-gray-600 leading-relaxed">{selected.description}</p>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
             )}
 
             {(() => {

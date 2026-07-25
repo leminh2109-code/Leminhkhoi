@@ -101,7 +101,7 @@ export default function MemoriesPage() {
               </div>
             </div>
             {selected.description && (
-              <p className="text-sm text-gray-600 leading-relaxed">{selected.description}</p>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
             )}
             <p className="text-xs text-gray-300 mt-4">Ghi bởi {selected.author.name}</p>
           </div>

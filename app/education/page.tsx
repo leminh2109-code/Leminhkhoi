@@ -133,7 +133,7 @@ export default function EducationPage() {
                         </span>
                       </div>
                       {e.description && (
-                        <p className="text-xs text-gray-500 mt-2 leading-relaxed">{e.description}</p>
+                        <p className="text-xs text-gray-500 mt-2 leading-relaxed whitespace-pre-wrap">{e.description}</p>
                       )}
                     </div>
                     <div className="flex border-t border-gray-50">
@@ -235,7 +235,7 @@ export default function EducationPage() {
                       </div>
                     </div>
                     {e.description && (
-                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">{e.description}</p>
+                      <p className="text-xs text-gray-500 mt-2 leading-relaxed whitespace-pre-wrap">{e.description}</p>
                     )}
                   </div>
                   <div className="flex border-t border-gray-50">
