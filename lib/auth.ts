@@ -30,17 +30,16 @@ export const authOptions: NextAuthOptions = {
   pages: { signIn: "/login" },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+      }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        const user = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { name: true },
-        });
-        if (user) session.user.name = user.name;
+        session.user.name = token.name as string;
       }
       return session;
     },
