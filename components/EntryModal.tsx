@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { EntryType, Entry } from "@/lib/types";
-import { TRAVEL_DATA, COUNTRY_LIST } from "@/lib/travel-data";
+import { COUNTRY_LIST } from "@/lib/travel-data";
 import toast from "react-hot-toast";
 
 type EntryTypeOption = {
@@ -78,12 +78,29 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
   const [customCountryMode, setCustomCountryMode] = useState(
     !!initCountry && !COUNTRY_LIST.includes(initCountry)
   );
-  const [customCityMode, setCustomCityMode] = useState(() => {
-    if (!initCountry || !COUNTRY_LIST.includes(initCountry)) return false;
-    const loc = entry?.metadata?.location as string | undefined;
-    const cities = TRAVEL_DATA[initCountry] || [];
-    return !!loc && cities.length > 0 && !cities.includes(loc);
-  });
+  const [newLocationInput, setNewLocationInput] = useState("");
+
+  const travelLocations: string[] = (() => {
+    try {
+      const parsed = JSON.parse(metadata.locations || "");
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch {}
+    const loc = String(metadata.location || "").trim();
+    return loc ? [loc] : [];
+  })();
+
+  function addTravelLocation() {
+    const loc = newLocationInput.trim();
+    if (!loc) return;
+    const next = [...travelLocations, loc];
+    setMetadata((m) => ({ ...m, locations: JSON.stringify(next), location: next[0] || "" }));
+    setNewLocationInput("");
+  }
+
+  function removeTravelLocation(idx: number) {
+    const next = travelLocations.filter((_, i) => i !== idx);
+    setMetadata((m) => ({ ...m, locations: JSON.stringify(next), location: next[0] || "" }));
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -227,9 +244,6 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
         {type === "TRAVEL" && (() => {
           const countryVal = metadata.country || "";
           const countrySelectVal = customCountryMode ? "Khác" : countryVal;
-          const availableCities = (!customCountryMode && countryVal) ? (TRAVEL_DATA[countryVal] || []) : [];
-          const locationVal = metadata.location || "";
-          const citySelectVal = customCityMode ? "Khác" : locationVal;
 
           return (
             <div className="space-y-3">
@@ -242,12 +256,10 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                     const val = e.target.value;
                     if (val === "Khác") {
                       setCustomCountryMode(true);
-                      setCustomCityMode(false);
-                      setMetadata((m) => ({ ...m, country: "", location: "" }));
+                      setMetadata((m) => ({ ...m, country: "", location: "", locations: "[]" }));
                     } else {
                       setCustomCountryMode(false);
-                      setCustomCityMode(false);
-                      setMetadata((m) => ({ ...m, country: val, location: "" }));
+                      setMetadata((m) => ({ ...m, country: val, location: "", locations: "[]" }));
                     }
                   }}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
@@ -269,50 +281,41 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 )}
               </div>
 
-              {/* City / Province */}
+              {/* Locations (multiple) */}
               {(countryVal || customCountryMode) && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Thành phố / Tỉnh</label>
-                  {availableCities.length > 0 ? (
-                    <>
-                      <select
-                        value={citySelectVal}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "Khác") {
-                            setCustomCityMode(true);
-                            setMetadata((m) => ({ ...m, location: "" }));
-                          } else {
-                            setCustomCityMode(false);
-                            setMetadata((m) => ({ ...m, location: val }));
-                          }
-                        }}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
-                      >
-                        <option value="">-- Chọn thành phố / tỉnh --</option>
-                        {availableCities.map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                        <option value="Khác">Khác</option>
-                      </select>
-                      {customCityMode && (
-                        <input
-                          value={locationVal}
-                          onChange={(e) => setMetadata((m) => ({ ...m, location: e.target.value }))}
-                          placeholder="Nhập tên thành phố / tỉnh"
-                          className="w-full mt-2 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
-                          autoFocus
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <input
-                      value={locationVal}
-                      onChange={(e) => setMetadata((m) => ({ ...m, location: e.target.value }))}
-                      placeholder="Nhập thành phố, tỉnh..."
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
-                    />
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Địa điểm đã đến</label>
+                  {travelLocations.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {travelLocations.map((loc, i) => (
+                        <span key={i} className="flex items-center gap-1 bg-teal-50 text-teal-700 text-xs font-medium px-2.5 py-1.5 rounded-full border border-teal-100">
+                          📍 {loc}
+                          <button
+                            type="button"
+                            onClick={() => removeTravelLocation(i)}
+                            className="ml-0.5 text-teal-400 hover:text-teal-600 leading-none text-base"
+                          >×</button>
+                        </span>
+                      ))}
+                    </div>
                   )}
+                  <div className="flex gap-2">
+                    <input
+                      value={newLocationInput}
+                      onChange={(e) => setNewLocationInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTravelLocation(); } }}
+                      placeholder="Nhập thành phố, tỉnh..."
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTravelLocation}
+                      disabled={!newLocationInput.trim()}
+                      className="px-3 py-3 bg-teal-50 text-teal-600 rounded-xl text-sm font-medium hover:bg-teal-100 transition flex-shrink-0 disabled:opacity-40"
+                    >
+                      + Thêm
+                    </button>
+                  </div>
                 </div>
               )}
 

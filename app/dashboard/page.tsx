@@ -7,7 +7,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS } from "@/lib/utils";
+import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS, getTravelLocations } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
@@ -270,8 +270,10 @@ export default function DashboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-2.5">
                     <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">{entry.title}</p>
-                    {!!entry.metadata.location && (
-                      <p className="text-white/70 text-[9px] mt-0.5 truncate">📍 {String(entry.metadata.location)}</p>
+                    {getTravelLocations(entry.metadata).length > 0 && (
+                      <p className="text-white/70 text-[9px] mt-0.5 truncate">
+                        📍 {getTravelLocations(entry.metadata).join(" · ")}
+                      </p>
                     )}
                     <p className="text-white/60 text-[9px] mt-0.5">
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}

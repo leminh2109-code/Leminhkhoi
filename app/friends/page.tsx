@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { formatDate, formatDateRange } from "@/lib/utils";
+import { formatDate, formatDateRange, getTravelLocations } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
@@ -100,8 +100,10 @@ export default function FriendsPage() {
           <div className="px-4 py-4 space-y-3">
             <div>
               <p className="text-xl font-semibold text-gray-900 leading-snug">{selectedTrip.title}</p>
-              {!!selectedTrip.metadata.location && (
-                <p className="text-sm text-teal-600 mt-1">📍 {String(selectedTrip.metadata.location)}</p>
+              {getTravelLocations(selectedTrip.metadata).length > 0 && (
+                <p className="text-sm text-teal-600 mt-1 leading-relaxed">
+                  📍 {getTravelLocations(selectedTrip.metadata).join(" · ")}
+                </p>
               )}
               <p className="text-sm text-gray-400 mt-1">
                 {formatDateRange(selectedTrip.date, selectedTrip.metadata.endDate as string)}

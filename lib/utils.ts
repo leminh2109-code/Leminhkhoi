@@ -48,6 +48,15 @@ export const ENTRY_TYPE_LABELS: Record<string, string> = {
   INFO: "Thông tin",
 };
 
+export function getTravelLocations(metadata: Record<string, unknown>): string[] {
+  try {
+    const parsed = JSON.parse(String(metadata.locations || ""));
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch {}
+  const loc = String(metadata.location || "").trim();
+  return loc ? [loc] : [];
+}
+
 export const ENTRY_TYPE_COLORS: Record<string, string> = {
   MEMORY: "bg-coral-50 text-coral-800 border-coral-100",
   TRAVEL: "bg-teal-50 text-teal-800 border-teal-100",

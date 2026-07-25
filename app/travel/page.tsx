@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
-import { formatDateRange } from "@/lib/utils";
+import { formatDateRange, getTravelLocations } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
@@ -58,13 +58,14 @@ function TravelPageInner() {
 
   const displayedEntries = entries.filter((e) => {
     if (countryFilter && String(e.metadata.country || "") !== countryFilter) return false;
-    if (locationFilter && String(e.metadata.location || "") !== locationFilter) return false;
+    if (locationFilter && !getTravelLocations(e.metadata).includes(locationFilter)) return false;
     return true;
   });
 
   const locationBreakdown = entries.reduce<Record<string, number>>((acc, e) => {
-    const loc = String(e.metadata.location || "").trim();
-    if (loc) acc[loc] = (acc[loc] || 0) + 1;
+    for (const loc of getTravelLocations(e.metadata)) {
+      acc[loc] = (acc[loc] || 0) + 1;
+    }
     return acc;
   }, {});
   const uniqueLocations = Object.keys(locationBreakdown).length;
@@ -143,8 +144,10 @@ function TravelPageInner() {
           <div className="px-4 py-4 space-y-3">
             <div>
               <p className="text-xl font-semibold text-gray-900 leading-snug">{selected.title}</p>
-              {!!selected.metadata.location && (
-                <p className="text-sm text-teal-600 mt-1">📍 {String(selected.metadata.location)}</p>
+              {getTravelLocations(selected.metadata).length > 0 && (
+                <p className="text-sm text-teal-600 mt-1 leading-relaxed">
+                  📍 {getTravelLocations(selected.metadata).join(" · ")}
+                </p>
               )}
               <p className="text-sm text-gray-400 mt-1">
                 {formatDateRange(selected.date, selected.metadata.endDate as string)}
@@ -259,8 +262,10 @@ function TravelPageInner() {
                       </span>
                     )}
                   </div>
-                  {!!entry.metadata.location && (
-                    <p className="text-xs text-teal-600 mt-0.5">📍 {String(entry.metadata.location)}</p>
+                  {getTravelLocations(entry.metadata).length > 0 && (
+                    <p className="text-xs text-teal-600 mt-0.5 leading-relaxed">
+                      📍 {getTravelLocations(entry.metadata).join(" · ")}
+                    </p>
                   )}
                   <p className="text-xs text-gray-400 mt-0.5">
                     {formatDateRange(entry.date, entry.metadata.endDate as string)}
