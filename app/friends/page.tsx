@@ -19,6 +19,7 @@ export default function FriendsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [selected, setSelected] = useState<Entry | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<Entry | null>(null);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
@@ -74,6 +75,50 @@ export default function FriendsPage() {
       )}
 
       {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
+
+      {/* Trip detail overlay — above friend detail */}
+      {selectedTrip && (
+        <div className="fixed inset-0 z-[60] bg-white overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
+            <button onClick={() => setSelectedTrip(null)} className="text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selectedTrip.title}</h2>
+          </div>
+
+          {selectedTrip.images.length > 0 && (
+            <div className="overflow-x-auto scrollbar-hide flex gap-2 p-4">
+              {selectedTrip.images.map((img, i) => (
+                <img key={i} src={img} alt="" className="h-64 rounded-2xl object-cover flex-shrink-0 shadow-sm cursor-zoom-in"
+                  onClick={() => setLightbox({ images: selectedTrip.images, index: i })} />
+              ))}
+            </div>
+          )}
+
+          <div className="px-4 py-4 space-y-3">
+            <div>
+              <p className="text-xl font-semibold text-gray-900 leading-snug">{selectedTrip.title}</p>
+              {!!selectedTrip.metadata.location && (
+                <p className="text-sm text-teal-600 mt-1">📍 {String(selectedTrip.metadata.location)}</p>
+              )}
+              <p className="text-sm text-gray-400 mt-1">
+                {formatDateRange(selectedTrip.date, selectedTrip.metadata.endDate as string)}
+              </p>
+              {!!selectedTrip.metadata.country && (
+                <span className="inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                  🌏 {String(selectedTrip.metadata.country)}
+                </span>
+              )}
+            </div>
+            {selectedTrip.description && (
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedTrip.description}</p>
+            )}
+            <p className="text-xs text-gray-300 pt-2">Ghi bởi {selectedTrip.author.name}</p>
+          </div>
+        </div>
+      )}
 
       {/* Detail view */}
       {selected && (
@@ -175,7 +220,8 @@ export default function FriendsPage() {
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">✈️ Chuyến đi cùng nhau</p>
                   <div className="space-y-2">
                     {sharedTrips.map((trip) => (
-                      <div key={trip.id} className="flex items-center gap-3 bg-teal-50 rounded-xl p-3">
+                      <button key={trip.id} onClick={() => setSelectedTrip(trip)}
+                        className="w-full flex items-center gap-3 bg-teal-50 rounded-xl p-3 text-left active:bg-teal-100 transition">
                         {trip.images[0] ? (
                           <img src={trip.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                         ) : (
@@ -192,7 +238,10 @@ export default function FriendsPage() {
                             {formatDateRange(trip.date, trip.metadata.endDate as string)}
                           </p>
                         </div>
-                      </div>
+                        <svg className="w-4 h-4 text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
                     ))}
                   </div>
                 </div>
