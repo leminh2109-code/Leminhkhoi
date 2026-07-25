@@ -7,15 +7,6 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Trang chủ", icon: "🏠" },
-  { href: "/education", label: "Học tập", icon: "📚" },
-  { href: "/travel", label: "Du lịch", icon: "✈️" },
-  { href: "/memories", label: "Kỷ niệm", icon: "💛" },
-  { href: "/friends", label: "Bạn bè", icon: "👫" },
-  { href: "/profile", label: "Cá nhân", icon: "👤" },
-];
-
-const mobileNavItems = [
-  { href: "/dashboard", label: "Trang chủ", icon: "🏠" },
   { href: "/friends", label: "Bạn bè", icon: "👫" },
   { href: "/profile", label: "Cá nhân", icon: "👤" },
 ];
@@ -81,7 +72,7 @@ export function NavBar() {
       {/* Mobile: bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#534AB7] safe-bottom z-50">
         <div className="flex justify-around px-1 pt-2 pb-4">
-          {mobileNavItems.map((item) => {
+          {navItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
