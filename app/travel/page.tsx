@@ -30,6 +30,7 @@ function TravelPageInner() {
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [locationFilter, setLocationFilter] = useState("");
   const [showLocationsModal, setShowLocationsModal] = useState(false);
+  const [showCountriesModal, setShowCountriesModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -69,7 +70,12 @@ function TravelPageInner() {
     return acc;
   }, {});
   const uniqueLocations = Object.keys(locationBreakdown).length;
-  const uniqueCountries = new Set(entries.map((e) => String(e.metadata.country || "")).filter(Boolean)).size;
+  const countryBreakdown = entries.reduce<Record<string, number>>((acc, e) => {
+    const c = String(e.metadata.country || "").trim();
+    if (c) acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
+  const uniqueCountries = Object.keys(countryBreakdown).length;
 
   return (
     <PageShell>
@@ -82,6 +88,30 @@ function TravelPageInner() {
           onClose={() => { setShowModal(false); setEditingEntry(null); }}
           onSaved={() => { fetchEntries(); setSelected(null); }}
         />
+      )}
+
+      {/* Countries modal */}
+      {showCountriesModal && (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/30" onClick={() => setShowCountriesModal(false)}>
+          <div className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {Object.entries(countryBreakdown)
+                .sort((a, b) => b[1] - a[1])
+                .map(([country, count]) => (
+                  <button
+                    key={country}
+                    onClick={() => { router.push(`/travel?country=${encodeURIComponent(country)}`); setShowCountriesModal(false); }}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition text-left"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{country}</span>
+                    <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Locations modal */}
@@ -206,10 +236,13 @@ function TravelPageInner() {
         {entries.length > 0 && (
           <div className="bg-teal-600 rounded-2xl p-4 mb-5 text-white">
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
+              <button
+                onClick={() => { router.push("/travel"); setLocationFilter(""); }}
+                className={`${(countryFilter || locationFilter) ? "opacity-70" : ""}`}
+              >
                 <p className="text-3xl font-semibold">{entries.length}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Số chuyến</p>
-              </div>
+              </button>
               <button
                 onClick={() => uniqueLocations > 0 && setShowLocationsModal(true)}
                 className="disabled:cursor-default"
@@ -218,10 +251,14 @@ function TravelPageInner() {
                 <p className="text-3xl font-semibold">{uniqueLocations || "–"}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Địa điểm</p>
               </button>
-              <div>
+              <button
+                onClick={() => uniqueCountries > 0 && setShowCountriesModal(true)}
+                className="disabled:cursor-default"
+                disabled={uniqueCountries === 0}
+              >
                 <p className="text-3xl font-semibold">{uniqueCountries || "–"}</p>
                 <p className="text-teal-200 text-xs mt-0.5">Quốc gia</p>
-              </div>
+              </button>
             </div>
           </div>
         )}
