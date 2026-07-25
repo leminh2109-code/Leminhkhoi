@@ -74,7 +74,7 @@ export function NavBar() {
 
       {/* Mobile: bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-50">
-        <div className="flex justify-around px-1 pt-1.5 pb-2">
+        <div className="flex justify-around px-1 pt-2 pb-4">
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
@@ -82,12 +82,12 @@ export function NavBar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 flex-1 py-1 rounded-xl transition-colors",
+                  "flex flex-col items-center gap-1 flex-1 py-1.5 rounded-xl transition-colors",
                   active ? "text-[#534AB7]" : "text-gray-400 hover:text-gray-600"
                 )}
               >
-                <span className="text-lg leading-none">{item.icon}</span>
-                <span className={cn("text-[9px] font-medium", active ? "text-[#534AB7]" : "text-gray-400")}>
+                <span className="text-2xl leading-none">{item.icon}</span>
+                <span className={cn("text-[10px] font-medium leading-tight", active ? "text-[#534AB7]" : "text-gray-400")}>
                   {item.label}
                 </span>
               </Link>
