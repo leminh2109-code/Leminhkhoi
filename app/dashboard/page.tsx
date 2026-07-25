@@ -11,6 +11,28 @@ import { getKhoiAge, formatDateRange, formatDateRangeLong, ENTRY_TYPE_LABELS } f
 import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
+const TYPE_COLORS: Record<string, string> = {
+  MEMORY: "bg-amber-50",
+  TRAVEL: "bg-teal-50",
+  SKILL: "bg-purple-50",
+  EDUCATION: "bg-purple-50",
+  BOOK: "bg-orange-50",
+  SCHOOL: "bg-blue-50",
+  FRIEND: "bg-pink-50",
+  HEALTH: "bg-green-50",
+};
+
+const TYPE_DOT: Record<string, string> = {
+  MEMORY: "bg-amber-400",
+  TRAVEL: "bg-teal-500",
+  SKILL: "bg-purple-500",
+  EDUCATION: "bg-purple-500",
+  BOOK: "bg-orange-400",
+  SCHOOL: "bg-blue-500",
+  FRIEND: "bg-pink-400",
+  HEALTH: "bg-green-500",
+};
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -42,7 +64,7 @@ export default function DashboardPage() {
 
   async function fetchEntries() {
     const [recentRes, allRes] = await Promise.all([
-      fetch("/api/entries?limit=10"),
+      fetch("/api/entries?limit=20"),
       fetch("/api/entries?limit=200"),
     ]);
     if (recentRes.ok) setEntries(await recentRes.json());
@@ -84,15 +106,8 @@ export default function DashboardPage() {
     return acc;
   }, {});
 
-  const TYPE_COLORS: Record<string, string> = {
-    MEMORY: "bg-coral-50",
-    TRAVEL: "bg-teal-50",
-    SKILL: "bg-purple-50",
-    EDUCATION: "bg-purple-50",
-    BOOK: "bg-amber-50",
-    SCHOOL: "bg-purple-50",
-    FRIEND: "bg-pink-50",
-  };
+  // Entries with photos for carousel
+  const photoEntries = entries.filter((e) => e.images.length > 0).slice(0, 10);
 
   if (status === "loading" || loading) {
     return (
@@ -126,20 +141,9 @@ export default function DashboardPage() {
               </svg>
             </button>
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
-            <button
-              onClick={() => { setEditingEntry(selected); setSelected(null); }}
-              className="text-sm text-purple-600 font-medium"
-            >
-              Sửa
-            </button>
-            <button
-              onClick={() => deleteEntry(selected.id)}
-              className="text-sm text-red-400 font-medium"
-            >
-              Xóa
-            </button>
+            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-purple-600 font-medium">Sửa</button>
+            <button onClick={() => deleteEntry(selected.id)} className="text-sm text-red-400 font-medium">Xóa</button>
           </div>
-
           {selected.images.length > 0 && (
             <div className="overflow-x-auto scrollbar-hide flex gap-2 p-4">
               {selected.images.map((img, i) => (
@@ -148,192 +152,183 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-
           <div className="px-4 py-2">
             <div className="flex items-center gap-3 mb-4">
               {selected.emoji && <span className="text-3xl">{selected.emoji}</span>}
               <div>
                 <p className="text-base font-semibold text-gray-800">{selected.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {formatDateRangeLong(selected.date, selected.metadata.endDate as string)}
-                </p>
+                <p className="text-xs text-gray-400 mt-0.5">{formatDateRangeLong(selected.date, selected.metadata.endDate as string)}</p>
                 <p className="text-xs text-gray-400">{ENTRY_TYPE_LABELS[selected.type]}</p>
               </div>
             </div>
             {selected.description && (
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
             )}
-            {selected.author && (
-              <p className="text-xs text-gray-300 mt-4">Ghi bởi {selected.author.name}</p>
-            )}
+            {selected.author && <p className="text-xs text-gray-300 mt-4">Ghi bởi {selected.author.name}</p>}
           </div>
         </div>
       )}
 
-      <div className="px-4 pt-6 pb-2">
+      {/* Countries modal */}
+      {showCountriesModal && (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/30" onClick={() => setShowCountriesModal(false)}>
+          <div className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
+            <div className="space-y-2">
+              {Object.entries(countryBreakdown).sort((a, b) => b[1] - a[1]).map(([country, count]) => (
+                <Link key={country} href={`/travel?country=${encodeURIComponent(country)}`}
+                  onClick={() => setShowCountriesModal(false)}
+                  className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition">
+                  <span className="text-sm font-medium text-gray-700">{country}</span>
+                  <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="pt-5 pb-2">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between px-4 mb-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Nhật ký Khôi</h1>
-            <p className="text-base text-gray-400 mt-0.5">Xin chào, {session?.user?.name} 👋</p>
+            <h1 className="text-xl font-bold text-gray-900">Nhật ký Khôi</h1>
+            <p className="text-sm text-gray-400 mt-0.5">Xin chào, {session?.user?.name} 👋</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleShare}
-              className="md:hidden flex items-center gap-1.5 text-sm text-purple-500 font-medium"
-              title="Chia sẻ với gia đình"
-            >
-              <span className="text-base">🔗</span>
+            <button onClick={handleShare} className="md:hidden flex items-center gap-1 text-sm text-purple-500 font-medium">
+              <span>🔗</span>
               <span>{shareCopied ? "Đã copy!" : "Chia sẻ"}</span>
             </button>
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              className="text-sm text-gray-400 hover:text-gray-600 transition"
-            >
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-sm text-gray-400">
               Đăng xuất
             </button>
           </div>
         </div>
 
-        {/* Hero card */}
-        <div className="bg-purple-600 rounded-2xl p-5 mb-5 text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/30">
-              <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-center" />
+        {/* Hero card — photo + name + stats tất cả trong một */}
+        <div className="mx-4 bg-[#534AB7] rounded-2xl overflow-hidden mb-5">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/30 shadow-lg">
+              <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
             </div>
-            <div>
-              <p className="font-semibold text-xl leading-tight">Lê Minh Khôi</p>
-              <p className="text-purple-200 text-sm mt-0.5">{getKhoiAge()} · Sinh 6/2/2022</p>
+            <div className="text-white">
+              <p className="font-bold text-lg leading-tight">Lê Minh Khôi</p>
+              <p className="text-purple-200 text-sm mt-0.5">{getKhoiAge()}</p>
+              <p className="text-purple-300 text-xs mt-0.5">Sinh 6/2/2022</p>
             </div>
+          </div>
+
+          {/* Stats row inside hero */}
+          <div className="grid grid-cols-5 border-t border-white/10">
+            {[
+              { label: "Kỷ niệm", value: stats.memories, href: "/memories", onClick: undefined },
+              { label: "Du lịch", value: stats.travel, href: "/travel", onClick: undefined },
+              { label: "Kỹ năng", value: stats.skills, href: "/education", onClick: undefined },
+              { label: "Bạn bè", value: stats.friends, href: "/friends", onClick: undefined },
+              { label: "Quốc gia", value: stats.countries || "–", href: undefined, onClick: () => stats.countries > 0 && setShowCountriesModal(true) },
+            ].map((s, i) => {
+              const inner = (
+                <div className="py-3 text-center">
+                  <p className="text-white font-bold text-lg leading-none">{s.value}</p>
+                  <p className="text-purple-300 text-[9px] mt-1 leading-tight">{s.label}</p>
+                </div>
+              );
+              return s.href ? (
+                <Link key={i} href={s.href} className={`${i > 0 ? "border-l border-white/10" : ""} active:bg-white/10 transition`}>
+                  {inner}
+                </Link>
+              ) : (
+                <button key={i} onClick={s.onClick} className={`${i > 0 ? "border-l border-white/10" : ""} active:bg-white/10 transition w-full`}>
+                  {inner}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-5 gap-1.5 mb-6">
-          {[
-            { label: "Kỷ niệm", value: stats.memories, color: "text-coral-600", href: "/memories" },
-            { label: "Du lịch", value: stats.travel, color: "text-teal-600", href: "/travel" },
-            { label: "Kỹ năng", value: stats.skills, color: "text-purple-600", href: "/education" },
-            { label: "Bạn bè", value: stats.friends, color: "text-pink-500", href: "/friends" },
-          ].map((s) => (
-            <Link
-              key={s.label}
-              href={s.href}
-              className="bg-white rounded-xl p-2 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
-            >
-              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{s.label}</p>
-            </Link>
-          ))}
-          <button
-            onClick={() => stats.countries > 0 && setShowCountriesModal(true)}
-            className="bg-white rounded-xl p-2 border border-gray-100 text-center active:bg-gray-50 transition hover:border-gray-200 hover:shadow-sm"
-          >
-            <p className="text-xl font-semibold text-teal-500">{stats.countries || "–"}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">Quốc gia</p>
-          </button>
-        </div>
-
-        {/* Countries modal */}
-        {showCountriesModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-end bg-black/30"
-            onClick={() => setShowCountriesModal(false)}
-          >
-            <div
-              className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-              <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
-              <div className="space-y-2">
-                {Object.entries(countryBreakdown)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([country, count]) => (
-                    <Link
-                      key={country}
-                      href={`/travel?country=${encodeURIComponent(country)}`}
-                      onClick={() => setShowCountriesModal(false)}
-                      className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition"
-                    >
-                      <span className="text-sm font-medium text-gray-700">{country}</span>
-                      <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
-                    </Link>
-                  ))}
-              </div>
+        {/* Photo carousel */}
+        {photoEntries.length > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center justify-between px-4 mb-2">
+              <h2 className="text-sm font-semibold text-gray-700">📸 Ảnh gần đây</h2>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
+              {photoEntries.map((entry) => (
+                <button
+                  key={entry.id}
+                  onClick={() => setSelected(entry)}
+                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition"
+                  style={{ width: 120, height: 150 }}
+                >
+                  <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    <p className="text-white text-[10px] font-medium leading-tight line-clamp-2">{entry.title}</p>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Recent */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-gray-700">Gần đây</h2>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-1 text-sm text-purple-600 font-medium"
-          >
-            <span className="text-base">+</span> Thêm mới
-          </button>
-        </div>
-
-        {entries.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
-            <p className="text-3xl mb-2">📝</p>
-            <p className="text-base text-gray-500">Chưa có ghi chép nào.</p>
-            <button
-              onClick={() => setShowModal(true)}
-              className="mt-3 text-sm text-purple-600 font-medium"
-            >
-              Thêm kỷ niệm đầu tiên →
+        {/* Recent activity */}
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700">🕐 Gần đây</h2>
+            <button onClick={() => setShowModal(true)} className="text-sm text-purple-600 font-medium">
+              + Thêm mới
             </button>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {entries.map((entry) => (
-              <div
-                key={entry.id}
-                className="bg-white rounded-xl border border-gray-100 overflow-hidden"
-              >
+
+          {entries.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+              <p className="text-3xl mb-2">📝</p>
+              <p className="text-sm text-gray-400">Chưa có ghi chép nào.</p>
+              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-purple-600 font-medium">
+                Thêm kỷ niệm đầu tiên →
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {entries.map((entry) => (
                 <button
+                  key={entry.id}
                   onClick={() => setSelected(entry)}
-                  className="w-full p-4 flex items-start gap-3 text-left active:bg-gray-50 transition"
+                  className="w-full bg-white rounded-2xl border border-gray-100 p-3.5 flex items-center gap-3 text-left active:bg-gray-50 transition"
                 >
-                  <div className={`w-11 h-11 rounded-xl ${TYPE_COLORS[entry.type] || "bg-gray-50"} flex items-center justify-center text-xl flex-shrink-0`}>
-                    {entry.emoji || "📌"}
+                  {/* Type dot */}
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0 w-6">
+                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${TYPE_DOT[entry.type] || "bg-gray-300"}`} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium text-gray-800 leading-snug">{entry.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-400">
-                        {formatDateRange(entry.date, entry.metadata.endDate as string)}
-                      </span>
-                      <span className="text-xs text-gray-300">·</span>
-                      <span className="text-xs text-gray-400">{ENTRY_TYPE_LABELS[entry.type]}</span>
+
+                  {/* Emoji or thumbnail */}
+                  {entry.images.length > 0 ? (
+                    <img src={entry.images[0]} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                  ) : (
+                    <div className={`w-10 h-10 rounded-xl ${TYPE_COLORS[entry.type] || "bg-gray-50"} flex items-center justify-center text-lg flex-shrink-0`}>
+                      {entry.emoji || "📌"}
                     </div>
-                  </div>
-                  {entry.images.length > 0 && (
-                    <img src={entry.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                   )}
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 leading-snug truncate">{entry.title}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      {formatDateRange(entry.date, entry.metadata.endDate as string)}
+                      <span className="mx-1">·</span>
+                      {ENTRY_TYPE_LABELS[entry.type]}
+                    </p>
+                  </div>
+
+                  <svg className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
-                <div className="flex border-t border-gray-50">
-                  <button
-                    onClick={() => setEditingEntry(entry)}
-                    className="flex-1 py-2.5 text-sm text-purple-500 font-medium hover:bg-purple-50 transition"
-                  >
-                    Sửa
-                  </button>
-                  <div className="w-px bg-gray-100" />
-                  <button
-                    onClick={() => deleteEntry(entry.id)}
-                    className="flex-1 py-2.5 text-sm text-red-400 font-medium hover:bg-red-50 transition"
-                  >
-                    Xóa
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </PageShell>
   );
