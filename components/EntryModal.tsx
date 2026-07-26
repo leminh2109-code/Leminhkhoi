@@ -102,17 +102,49 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
     setMetadata((m) => ({ ...m, locations: JSON.stringify(next), location: next[0] || "" }));
   }
 
+  async function compressImage(file: File): Promise<File> {
+    if (file.size < 400 * 1024) return file;
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1920;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => resolve(new File([blob!], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" })),
+          "image/jpeg",
+          0.82
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     setUploading(true);
     for (const file of files) {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const data = await res.json();
-        setImages((prev) => [...prev, data.url]);
+      try {
+        const compressed = await compressImage(file);
+        const fd = new FormData();
+        fd.append("file", compressed);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        if (res.ok) {
+          const data = await res.json();
+          setImages((prev) => [...prev, data.url]);
+        } else {
+          const err = await res.json().catch(() => ({}));
+          toast.error(err.error || "Upload ảnh thất bại, thử lại nhé");
+        }
+      } catch {
+        toast.error("Lỗi khi upload ảnh");
       }
     }
     setUploading(false);
