@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { EntryType, Entry } from "@/lib/types";
 import { COUNTRY_LIST } from "@/lib/travel-data";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import toast from "react-hot-toast";
 
 type EntryTypeOption = {
@@ -52,6 +53,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [friendEntries, setFriendEntries] = useState<Entry[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -184,6 +186,9 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      {lightboxIndex !== null && (
+        <ImageLightbox images={images} index={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+      )}
       <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -564,7 +569,8 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 <img
                   src={url}
                   alt=""
-                  className={`w-20 h-20 rounded-xl object-cover ${i === 0 ? "ring-2 ring-yellow-400" : ""}`}
+                  onClick={() => setLightboxIndex(i)}
+                  className={`w-20 h-20 rounded-xl object-cover cursor-zoom-in ${i === 0 ? "ring-2 ring-yellow-400" : ""}`}
                 />
                 {/* Remove button */}
                 <button
