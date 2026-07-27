@@ -223,8 +223,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Stats row inside hero */}
-          <div className="grid grid-cols-5 border-t border-amber-200">
+          {/* Stats row — floating buttons */}
+          <div className="flex gap-2 px-3 pb-3 pt-1">
             {[
               { label: "Kỷ niệm", value: stats.memories, href: "/memories", onClick: undefined },
               { label: "Du lịch", value: stats.travel, href: "/travel", onClick: undefined },
@@ -233,19 +233,16 @@ export default function DashboardPage() {
               { label: "Quốc gia", value: stats.countries || "–", href: undefined, onClick: () => stats.countries > 0 && setShowCountriesModal(true) },
             ].map((s, i) => {
               const inner = (
-                <div className="py-3 text-center">
-                  <p className="text-amber-800 font-bold text-lg leading-none">{s.value}</p>
-                  <p className="text-amber-600 text-[9px] mt-1 leading-tight">{s.label}</p>
+                <div className="flex flex-col items-center py-2 px-1">
+                  <p className="text-amber-800 font-bold text-base leading-none">{s.value}</p>
+                  <p className="text-amber-500 text-[9px] mt-1 leading-tight whitespace-nowrap">{s.label}</p>
                 </div>
               );
+              const cls = "flex-1 bg-white rounded-xl shadow-sm border border-amber-100 active:scale-95 transition-transform";
               return s.href ? (
-                <Link key={i} href={s.href} className={`${i > 0 ? "border-l border-amber-200" : ""} active:bg-amber-100 transition`}>
-                  {inner}
-                </Link>
+                <Link key={i} href={s.href} className={cls}>{inner}</Link>
               ) : (
-                <button key={i} onClick={s.onClick} className={`${i > 0 ? "border-l border-amber-200" : ""} active:bg-amber-100 transition w-full`}>
-                  {inner}
-                </button>
+                <button key={i} onClick={s.onClick} className={cls}>{inner}</button>
               );
             })}
           </div>

@@ -70,7 +70,7 @@ export function NavBar() {
       </aside>
 
       {/* Mobile: bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 z-50" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 z-50" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}>
         <div className="flex justify-around px-2 pt-2 pb-2">
           {navItems.map((item) => {
             const active = pathname === item.href;
