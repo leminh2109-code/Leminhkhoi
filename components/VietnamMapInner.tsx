@@ -102,7 +102,7 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
       attributionControl={false}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com">CARTO</a>'
       />
 
@@ -110,15 +110,22 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
         <CircleMarker
           key={name}
           center={coords}
-          radius={9}
+          radius={8}
           fillColor="#B45309"
           color="#fff"
           weight={2}
           fillOpacity={0.9}
           eventHandlers={{ click: () => onLocationClick?.(name) }}
         >
-          <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>📍 {name}</span>
+          <Tooltip
+            direction="right"
+            offset={[10, 0]}
+            opacity={1}
+            permanent
+          >
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#92400e", whiteSpace: "nowrap" }}>
+              {name}
+            </span>
           </Tooltip>
         </CircleMarker>
       ))}
