@@ -93,16 +93,6 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
   }, [vietnamEntries]);
 
   return (
-    <>
-    <style>{`
-      .city-label {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-      }
-      .city-label::before { display: none !important; }
-    `}</style>
     <MapContainer
       center={[16.5, 106.5]}
       zoom={5}
@@ -120,27 +110,18 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
         <CircleMarker
           key={name}
           center={coords}
-          radius={8}
+          radius={6}
           fillColor="#B45309"
           color="#fff"
           weight={2}
           fillOpacity={0.9}
           eventHandlers={{ click: () => onLocationClick?.(name) }}
         >
-          <Tooltip
-            direction="right"
-            offset={[10, 0]}
-            opacity={1}
-            permanent
-            className="city-label"
-          >
-            <span style={{ fontSize: 9, fontWeight: 700, color: "#92400e", whiteSpace: "nowrap", textShadow: "0 0 3px #fff, 0 0 3px #fff" }}>
-              {name}
-            </span>
+          <Tooltip direction="top" offset={[0, -8]} opacity={1}>
+            <span style={{ fontSize: 12, fontWeight: 600 }}>📍 {name}</span>
           </Tooltip>
         </CircleMarker>
       ))}
     </MapContainer>
-    </>
   );
 }

@@ -9,6 +9,7 @@ import { Entry } from "@/lib/types";
 import { formatDateRange, getTravelLocations } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { VietnamMap } from "@/components/VietnamMap";
+import { JapanMap } from "@/components/JapanMap";
 import toast from "react-hot-toast";
 
 export default function TravelPage() {
@@ -264,11 +265,26 @@ function TravelPageInner() {
           </div>
         )}
 
-        {/* Vietnam map — chỉ hiện khi không filter, có entries VN */}
+        {/* Vietnam map */}
         {!countryFilter && !locationFilter && entries.some(e => !e.metadata.country || String(e.metadata.country).includes("Việt")) && (
           <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
             <p className="text-sm font-semibold text-gray-700 mb-3">🗺️ Bản đồ Việt Nam</p>
             <VietnamMap
+              entries={entries}
+              onLocationClick={(loc) => setLocationFilter(loc)}
+            />
+          </div>
+        )}
+
+        {/* Japan map */}
+        {!countryFilter && !locationFilter && entries.some(e =>
+          String(e.metadata.country).includes("Nhật") ||
+          String(e.metadata.country).toLowerCase().includes("japan") ||
+          String(e.metadata.country).includes("日本")
+        ) && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
+            <p className="text-sm font-semibold text-gray-700 mb-3">🗾 Bản đồ Nhật Bản</p>
+            <JapanMap
               entries={entries}
               onLocationClick={(loc) => setLocationFilter(loc)}
             />
