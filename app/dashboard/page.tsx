@@ -261,21 +261,22 @@ export default function DashboardPage() {
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {travelSlide.map((entry) => (
                 <button key={entry.id} onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition bg-teal-50"
-                  style={{ width: 130, height: 165 }}>
-                  {entry.images[0]
-                    ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "🗺️"}</div>
-                  }
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                    <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">{entry.title}</p>
+                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition bg-white border border-gray-100 text-left"
+                  style={{ width: 130 }}>
+                  <div className="bg-teal-50 flex-shrink-0" style={{ height: 115 }}>
+                    {entry.images[0]
+                      ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "🗺️"}</div>
+                    }
+                  </div>
+                  <div className="px-2.5 pt-2 pb-2.5 flex flex-col gap-0.5">
+                    <p className="text-gray-800 text-[11px] font-semibold leading-snug line-clamp-2">{entry.title}</p>
                     {getTravelLocations(entry.metadata).length > 0 && (
-                      <p className="text-white/70 text-[9px] mt-0.5 truncate">
+                      <p className="text-teal-600 text-[9px] truncate">
                         📍 {getTravelLocations(entry.metadata).join(" · ")}
                       </p>
                     )}
-                    <p className="text-white/60 text-[9px] mt-0.5">
+                    <p className="text-gray-400 text-[9px]">
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                     </p>
                   </div>
@@ -295,16 +296,17 @@ export default function DashboardPage() {
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {memoriesSlide.map((entry) => (
                 <button key={entry.id} onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 relative rounded-2xl overflow-hidden active:opacity-90 transition bg-amber-50"
-                  style={{ width: 130, height: 165 }}>
-                  {entry.images[0]
-                    ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "💛"}</div>
-                  }
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                    <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">{entry.title}</p>
-                    <p className="text-white/60 text-[9px] mt-0.5">
+                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition bg-white border border-gray-100 text-left"
+                  style={{ width: 130 }}>
+                  <div className="bg-amber-50 flex-shrink-0" style={{ height: 115 }}>
+                    {entry.images[0]
+                      ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "💛"}</div>
+                    }
+                  </div>
+                  <div className="px-2.5 pt-2 pb-2.5 flex flex-col gap-0.5">
+                    <p className="text-gray-800 text-[11px] font-semibold leading-snug line-clamp-2">{entry.title}</p>
+                    <p className="text-gray-400 text-[9px]">
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                     </p>
                   </div>
