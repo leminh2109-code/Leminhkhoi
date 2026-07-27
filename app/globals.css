@@ -51,6 +51,19 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Sidebar nav items — theme-aware hover/active */
+.sidebar-nav-item {
+  color: var(--text-2);
+}
+.sidebar-nav-item:hover {
+  background-color: var(--bg-card2);
+  color: var(--text);
+}
+.sidebar-nav-item.active {
+  background-color: var(--amber-card);
+  color: #b45309;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;

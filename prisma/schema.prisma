@@ -33,6 +33,11 @@ model Entry {
   updatedAt   DateTime @updatedAt
 }
 
+model Setting {
+  key   String @id
+  value String
+}
+
 enum EntryType {
   MEMORY
   TRAVEL

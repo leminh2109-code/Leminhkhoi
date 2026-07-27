@@ -55,17 +55,26 @@ export default function DashboardPage() {
   const coverPosRef = useRef({ x: 50, y: 0 });
 
   useEffect(() => {
-    const img = localStorage.getItem("coverImage");
-    const pos = localStorage.getItem("coverPos");
-    if (img) setCoverImage(img);
-    if (pos) {
-      try {
-        const p = JSON.parse(pos);
-        setCoverPos(p);
-        coverPosRef.current = p;
-      } catch {}
-    }
+    fetch("/api/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        if (data.image) setCoverImage(data.image);
+        if (data.pos) {
+          setCoverPos(data.pos);
+          coverPosRef.current = data.pos;
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  async function saveCoverToServer(image: string, pos: { x: number; y: number }) {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, pos }),
+    });
+  }
 
   async function handleCoverFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -81,10 +90,9 @@ export default function DashboardPage() {
       setCoverImage(url);
       setCoverPos(newPos);
       coverPosRef.current = newPos;
-      localStorage.setItem("coverImage", url);
-      localStorage.setItem("coverPos", JSON.stringify(newPos));
       setEditingCover(true);
       toast.success("Đã đổi ảnh bìa!", { id: toastId });
+      saveCoverToServer(url, newPos);
     } else {
       toast.error("Upload thất bại", { id: toastId });
     }
@@ -110,13 +118,12 @@ export default function DashboardPage() {
   function onCoverDragEnd() {
     if (!dragRef.current) return;
     dragRef.current = null;
-    localStorage.setItem("coverPos", JSON.stringify(coverPosRef.current));
   }
 
   function saveCoverPos() {
     dragRef.current = null;
     setEditingCover(false);
-    localStorage.setItem("coverPos", JSON.stringify(coverPosRef.current));
+    saveCoverToServer(coverImage, coverPosRef.current);
   }
 
   async function handleShare() {

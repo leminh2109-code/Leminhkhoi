@@ -31,13 +31,16 @@ export function NavBar() {
   return (
     <>
       {/* Desktop: sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col bg-white border-r border-gray-100 z-50 py-8 px-4">
+      <aside
+        className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col z-50 py-8 px-4 border-r"
+        style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" }}
+      >
         <div className="mb-8 px-2">
           <div className="w-11 h-11 rounded-2xl overflow-hidden mb-3 flex-shrink-0">
             <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-center" />
           </div>
-          <p className="font-semibold text-gray-900 text-sm leading-tight">Nhật ký Khôi</p>
-          <p className="text-xs text-gray-400 mt-0.5">Lê Minh Khôi</p>
+          <p className="font-semibold text-sm leading-tight" style={{ color: "var(--text)" }}>Nhật ký Khôi</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-2)" }}>Lê Minh Khôi</p>
         </div>
 
         <nav className="flex flex-col gap-1 flex-1">
@@ -48,10 +51,8 @@ export function NavBar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                  active
-                    ? "bg-amber-50 text-amber-700"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                  "sidebar-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                  active && "active"
                 )}
               >
                 <span className="text-lg leading-none">{item.icon}</span>
@@ -64,16 +65,16 @@ export function NavBar() {
         {/* Theme toggle */}
         <button
           onClick={toggle}
-          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition w-full"
+          className="sidebar-nav-item flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition w-full"
         >
           <span className="text-lg leading-none">{theme === "dark" ? "☀️" : "🌙"}</span>
           {theme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
         </button>
 
-        {/* Share button at bottom of sidebar */}
+        {/* Share button */}
         <button
           onClick={handleShare}
-          className="mt-1 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition w-full"
+          className="mt-1 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-600 hover:bg-amber-50 transition w-full"
         >
           <span className="text-lg leading-none">🔗</span>
           {copied ? "✓ Đã copy link!" : "Chia sẻ với gia đình"}
