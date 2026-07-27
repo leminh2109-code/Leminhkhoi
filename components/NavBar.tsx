@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme";
 
 const navItems = [
   { href: "/dashboard", label: "Trang chủ", icon: "🏠" },
@@ -14,6 +15,7 @@ const navItems = [
 export function NavBar() {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
+  const { theme, toggle } = useTheme();
 
   async function handleShare() {
     const url = `${window.location.origin}/family`;
@@ -70,7 +72,14 @@ export function NavBar() {
       </aside>
 
       {/* Mobile: bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 z-50" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}>
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          borderColor: "var(--border-2)",
+          paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)",
+        }}
+      >
         <div className="flex justify-around px-2 pt-2 pb-2">
           {navItems.map((item) => {
             const active = pathname === item.href;
@@ -80,16 +89,26 @@ export function NavBar() {
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center gap-0.5 flex-1 py-1.5 px-2 rounded-xl transition-colors",
-                  active ? "text-amber-700" : "text-gray-400"
+                  active ? "text-amber-500" : "text-gray-400"
                 )}
               >
                 <span className="text-2xl leading-none">{item.icon}</span>
-                <span className={cn("text-[10px] font-semibold leading-tight", active ? "text-amber-700" : "text-gray-400")}>
+                <span className={cn("text-[10px] font-semibold leading-tight", active ? "text-amber-500" : "text-gray-400")}>
                   {item.label}
                 </span>
               </Link>
             );
           })}
+          {/* Theme toggle */}
+          <button
+            onClick={toggle}
+            className="flex flex-col items-center gap-0.5 flex-1 py-1.5 px-2 rounded-xl text-gray-400"
+          >
+            <span className="text-2xl leading-none">{theme === "dark" ? "☀️" : "🌙"}</span>
+            <span className="text-[10px] font-semibold leading-tight">
+              {theme === "dark" ? "Sáng" : "Tối"}
+            </span>
+          </button>
         </div>
       </nav>
     </>

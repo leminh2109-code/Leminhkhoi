@@ -14,8 +14,36 @@ html {
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 font-sans;
+  @apply font-sans;
+  background-color: var(--bg);
+  color: var(--text);
   overscroll-behavior: none;
+}
+
+:root {
+  --bg: #f9fafb;
+  --bg-card: #ffffff;
+  --bg-card2: #f3f4f6;
+  --text: #111827;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+  --border: #f3f4f6;
+  --border-2: #e5e7eb;
+  --amber-card: #fffbeb;
+  --amber-border: #fde68a;
+}
+
+:root.dark {
+  --bg: #111111;
+  --bg-card: #1c1c1e;
+  --bg-card2: #2c2c2e;
+  --text: #ffffff;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+  --border: rgba(255,255,255,0.08);
+  --border-2: rgba(255,255,255,0.12);
+  --amber-card: #1c1800;
+  --amber-border: rgba(251,191,36,0.2);
 }
 
 /* Safe area for mobile */

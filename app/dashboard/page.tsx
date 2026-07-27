@@ -192,88 +192,86 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="pt-5 pb-2">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 mb-4">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Nhật ký Khôi</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Xin chào, {session?.user?.name} 👋</p>
-          </div>
+      {/* ── COVER IMAGE HERO ── */}
+      <div className="relative w-full" style={{ height: 220 }}>
+        <img src="/khoi1.jpeg" alt="cover" className="w-full h-full object-cover object-top" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+        {/* Top bar */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12">
+          <p className="text-white font-bold text-base tracking-wide">Nhật ký Khôi</p>
           <div className="flex items-center gap-3">
-            <button onClick={handleShare} className="md:hidden flex items-center gap-1 text-sm text-amber-700 font-medium">
-              <span>🔗</span>
-              <span>{shareCopied ? "Đã copy!" : "Chia sẻ"}</span>
+            <button onClick={handleShare} className="text-amber-300 text-sm font-medium">
+              {shareCopied ? "✓ Đã copy!" : "🔗 Chia sẻ"}
             </button>
-            <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-sm text-gray-400">
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
               Đăng xuất
             </button>
           </div>
         </div>
-
-        {/* Hero card — photo + name + stats tất cả trong một */}
-        <div className="mx-4 bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden mb-5">
-          <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-amber-200 shadow-sm">
-              <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
-            </div>
-            <div>
-              <p className="font-bold text-lg leading-tight text-amber-900">Lê Minh Khôi</p>
-              <p className="text-amber-700 text-sm mt-0.5">{getKhoiAge()}</p>
-              <p className="text-amber-600 text-xs mt-0.5">Sinh 6/2/2022</p>
-            </div>
+        {/* Profile + name at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 px-4 pb-4">
+          <div className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-amber-400 shadow-lg">
+            <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
           </div>
-
-          {/* Stats row — floating buttons */}
-          <div className="flex gap-2 px-3 pb-3 pt-1">
-            {[
-              { label: "Kỷ niệm", value: stats.memories, href: "/memories", onClick: undefined },
-              { label: "Du lịch", value: stats.travel, href: "/travel", onClick: undefined },
-              { label: "Kỹ năng", value: stats.skills, href: "/education", onClick: undefined },
-              { label: "Bạn bè", value: stats.friends, href: "/friends", onClick: undefined },
-              { label: "Quốc gia", value: stats.countries || "–", href: undefined, onClick: () => stats.countries > 0 && setShowCountriesModal(true) },
-            ].map((s, i) => {
-              const inner = (
-                <div className="flex flex-col items-center py-2 px-1">
-                  <p className="text-amber-800 font-bold text-base leading-none">{s.value}</p>
-                  <p className="text-amber-500 text-[9px] mt-1 leading-tight whitespace-nowrap">{s.label}</p>
-                </div>
-              );
-              const cls = "flex-1 bg-white rounded-xl shadow-sm border border-amber-100 active:scale-95 transition-transform";
-              return s.href ? (
-                <Link key={i} href={s.href} className={cls}>{inner}</Link>
-              ) : (
-                <button key={i} onClick={s.onClick} className={cls}>{inner}</button>
-              );
-            })}
+          <div className="pb-0.5">
+            <p className="text-white font-bold text-lg leading-tight">Lê Minh Khôi</p>
+            <p className="text-amber-300 text-xs mt-0.5">{getKhoiAge()} · Sinh 6/2/2022</p>
           </div>
+        </div>
+      </div>
+
+      <div className="pb-2">
+        {/* Stats row — floating buttons */}
+        <div className="flex gap-2 px-4 py-4">
+          {[
+            { label: "Kỷ niệm", value: stats.memories, href: "/memories", onClick: undefined },
+            { label: "Du lịch", value: stats.travel, href: "/travel", onClick: undefined },
+            { label: "Kỹ năng", value: stats.skills, href: "/education", onClick: undefined },
+            { label: "Bạn bè", value: stats.friends, href: "/friends", onClick: undefined },
+            { label: "Quốc gia", value: stats.countries || "–", href: undefined, onClick: () => stats.countries > 0 && setShowCountriesModal(true) },
+          ].map((s, i) => {
+            const inner = (
+              <div className="flex flex-col items-center py-2.5 px-1">
+                <p className="font-bold text-base leading-none text-amber-500">{s.value}</p>
+                <p className="text-[9px] mt-1 leading-tight whitespace-nowrap" style={{ color: "var(--text-2)" }}>{s.label}</p>
+              </div>
+            );
+            const cls = "flex-1 rounded-xl shadow-sm active:scale-95 transition-transform border";
+            const style = { backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" };
+            return s.href ? (
+              <Link key={i} href={s.href} className={cls} style={style}>{inner}</Link>
+            ) : (
+              <button key={i} onClick={s.onClick} className={cls} style={style}>{inner}</button>
+            );
+          })}
         </div>
 
         {/* Du lịch carousel */}
         {travelSlide.length > 0 && (
           <div className="mb-5">
             <div className="flex items-center justify-between px-4 mb-2">
-              <h2 className="text-sm font-semibold text-gray-700">✈️ Du lịch</h2>
-              <Link href="/travel" className="text-xs text-teal-600 font-medium">Xem tất cả →</Link>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>✈️ Du lịch</h2>
+              <Link href="/travel" className="text-xs text-teal-500 font-medium">Xem tất cả →</Link>
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {travelSlide.map((entry) => (
                 <button key={entry.id} onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition bg-white border border-gray-100 text-left"
-                  style={{ width: 130 }}>
-                  <div className="bg-teal-50 flex-shrink-0" style={{ height: 115 }}>
+                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition text-left border"
+                  style={{ width: 130, backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}>
+                  <div className="flex-shrink-0 bg-teal-900/20" style={{ height: 115 }}>
                     {entry.images[0]
                       ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "🗺️"}</div>
                     }
                   </div>
                   <div className="px-2.5 pt-2 pb-2.5 flex flex-col gap-0.5">
-                    <p className="text-gray-800 text-[11px] font-semibold leading-snug line-clamp-2">{entry.title}</p>
+                    <p className="text-[11px] font-semibold leading-snug line-clamp-2" style={{ color: "var(--text)" }}>{entry.title}</p>
                     {getTravelLocations(entry.metadata).length > 0 && (
-                      <p className="text-teal-600 text-[9px] truncate">
+                      <p className="text-teal-500 text-[9px] truncate">
                         📍 {getTravelLocations(entry.metadata).join(" · ")}
                       </p>
                     )}
-                    <p className="text-gray-400 text-[9px]">
+                    <p className="text-[9px]" style={{ color: "var(--text-3)" }}>
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                     </p>
                   </div>
@@ -287,23 +285,23 @@ export default function DashboardPage() {
         {memoriesSlide.length > 0 && (
           <div className="mb-5">
             <div className="flex items-center justify-between px-4 mb-2">
-              <h2 className="text-sm font-semibold text-gray-700">💛 Kỷ niệm</h2>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>💛 Kỷ niệm</h2>
               <Link href="/memories" className="text-xs text-amber-500 font-medium">Xem tất cả →</Link>
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {memoriesSlide.map((entry) => (
                 <button key={entry.id} onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition bg-white border border-gray-100 text-left"
-                  style={{ width: 130 }}>
-                  <div className="bg-amber-50 flex-shrink-0" style={{ height: 115 }}>
+                  className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden active:opacity-90 transition text-left border"
+                  style={{ width: 130, backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}>
+                  <div className="flex-shrink-0 bg-amber-900/20" style={{ height: 115 }}>
                     {entry.images[0]
                       ? <img src={entry.images[0]} alt={entry.title} className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center text-4xl">{entry.emoji || "💛"}</div>
                     }
                   </div>
                   <div className="px-2.5 pt-2 pb-2.5 flex flex-col gap-0.5">
-                    <p className="text-gray-800 text-[11px] font-semibold leading-snug line-clamp-2">{entry.title}</p>
-                    <p className="text-gray-400 text-[9px]">
+                    <p className="text-[11px] font-semibold leading-snug line-clamp-2" style={{ color: "var(--text)" }}>{entry.title}</p>
+                    <p className="text-[9px]" style={{ color: "var(--text-3)" }}>
                       {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                     </p>
                   </div>
@@ -317,17 +315,17 @@ export default function DashboardPage() {
         {educationSlide.length > 0 && (
           <div className="mb-5">
             <div className="flex items-center justify-between px-4 mb-2">
-              <h2 className="text-sm font-semibold text-gray-700">📚 Học tập</h2>
-              <Link href="/education" className="text-xs text-amber-700 font-medium">Xem tất cả →</Link>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>📚 Học tập</h2>
+              <Link href="/education" className="text-xs text-amber-500 font-medium">Xem tất cả →</Link>
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {educationSlide.map((entry) => (
                 <button key={entry.id} onClick={() => setSelected(entry)}
-                  className="flex-shrink-0 rounded-2xl bg-white border border-gray-100 p-3 text-left active:bg-gray-50 transition flex flex-col gap-1.5"
-                  style={{ width: 150 }}>
+                  className="flex-shrink-0 rounded-2xl p-3 text-left transition flex flex-col gap-1.5 border"
+                  style={{ width: 150, backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}>
                   <span className="text-2xl">{entry.emoji || "📌"}</span>
-                  <p className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">{entry.title}</p>
-                  <p className="text-[10px] text-gray-400 mt-auto">
+                  <p className="text-xs font-semibold leading-snug line-clamp-2" style={{ color: "var(--text)" }}>{entry.title}</p>
+                  <p className="text-[10px] mt-auto" style={{ color: "var(--text-3)" }}>
                     {new Date(entry.date).toLocaleDateString("vi-VN", { month: "numeric", year: "numeric" })}
                   </p>
                 </button>
@@ -339,17 +337,17 @@ export default function DashboardPage() {
         {/* Recent activity */}
         <div className="px-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">🕐 Gần đây</h2>
-            <button onClick={() => setShowModal(true)} className="text-sm text-amber-700 font-medium">
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>🕐 Gần đây</h2>
+            <button onClick={() => setShowModal(true)} className="text-sm text-amber-500 font-medium">
               + Thêm mới
             </button>
           </div>
 
           {entries.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="rounded-2xl border p-8 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}>
               <p className="text-3xl mb-2">📝</p>
-              <p className="text-sm text-gray-400">Chưa có ghi chép nào.</p>
-              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-amber-700 font-medium">
+              <p className="text-sm" style={{ color: "var(--text-2)" }}>Chưa có ghi chép nào.</p>
+              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-amber-500 font-medium">
                 Thêm kỷ niệm đầu tiên →
               </button>
             </div>
@@ -359,32 +357,28 @@ export default function DashboardPage() {
                 <button
                   key={entry.id}
                   onClick={() => setSelected(entry)}
-                  className="w-full bg-white rounded-2xl border border-gray-100 p-3.5 flex items-center gap-3 text-left active:bg-gray-50 transition"
+                  className="w-full rounded-2xl border p-3.5 flex items-center gap-3 text-left transition"
+                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}
                 >
-                  {/* Type dot */}
-                  <div className="flex flex-col items-center gap-1 flex-shrink-0 w-6">
-                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${TYPE_DOT[entry.type] || "bg-gray-300"}`} />
+                  <div className="flex-shrink-0 w-6">
+                    <div className={`w-2.5 h-2.5 rounded-full ${TYPE_DOT[entry.type] || "bg-gray-300"}`} />
                   </div>
-
-                  {/* Emoji or thumbnail */}
                   {entry.images.length > 0 ? (
                     <img src={entry.images[0]} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                   ) : (
-                    <div className={`w-10 h-10 rounded-xl ${TYPE_COLORS[entry.type] || "bg-gray-50"} flex items-center justify-center text-lg flex-shrink-0`}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ backgroundColor: "var(--bg-card2)" }}>
                       {entry.emoji || "📌"}
                     </div>
                   )}
-
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 leading-snug truncate">{entry.title}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">
+                    <p className="text-sm font-medium leading-snug truncate" style={{ color: "var(--text)" }}>{entry.title}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
                       {formatDateRange(entry.date, entry.metadata.endDate as string)}
                       <span className="mx-1">·</span>
                       {ENTRY_TYPE_LABELS[entry.type]}
                     </p>
                   </div>
-
-                  <svg className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--text-3)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
