@@ -93,6 +93,16 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
   }, [vietnamEntries]);
 
   return (
+    <>
+    <style>{`
+      .city-label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .city-label::before { display: none !important; }
+    `}</style>
     <MapContainer
       center={[16.5, 106.5]}
       zoom={5}
@@ -122,13 +132,15 @@ export default function VietnamMapInner({ entries, onLocationClick }: Props) {
             offset={[10, 0]}
             opacity={1}
             permanent
+            className="city-label"
           >
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#92400e", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: "#92400e", whiteSpace: "nowrap", textShadow: "0 0 3px #fff, 0 0 3px #fff" }}>
               {name}
             </span>
           </Tooltip>
         </CircleMarker>
       ))}
     </MapContainer>
+    </>
   );
 }
