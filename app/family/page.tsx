@@ -18,8 +18,8 @@ const TYPE_TABS = [
 const TYPE_COLORS: Record<string, string> = {
   MEMORY: "bg-amber-50",
   TRAVEL: "bg-teal-50",
-  EDUCATION: "bg-purple-50",
-  SKILL: "bg-purple-50",
+  EDUCATION: "bg-amber-50",
+  SKILL: "bg-amber-50",
   SCHOOL: "bg-blue-50",
   FRIEND: "bg-pink-50",
   BOOK: "bg-orange-50",
@@ -145,19 +145,19 @@ export default function FamilyPage() {
       )}
 
       {/* Hero header */}
-      <div className="bg-[#534AB7] px-4 pt-10 pb-6">
+      <div className="bg-amber-50 border-b border-amber-200 px-4 pt-10 pb-6">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-white/30 flex-shrink-0 shadow-lg">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-200 flex-shrink-0 shadow-sm">
               <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
             </div>
-            <div className="text-white">
-              <p className="text-2xl font-bold leading-tight">Lê Minh Khôi</p>
-              <p className="text-purple-200 text-sm mt-1">{getKhoiAge()} · Sinh 6/2/2022</p>
-              <p className="text-purple-200 text-xs mt-0.5">Hà Nội, Việt Nam</p>
+            <div>
+              <p className="text-2xl font-bold leading-tight text-amber-900">Lê Minh Khôi</p>
+              <p className="text-amber-700 text-sm mt-1">{getKhoiAge()} · Sinh 6/2/2022</p>
+              <p className="text-amber-600 text-xs mt-0.5">Hà Nội, Việt Nam</p>
             </div>
           </div>
-          <p className="text-purple-200 text-sm leading-relaxed">
+          <p className="text-amber-700 text-sm leading-relaxed">
             ✨ Đây là nhật ký hành trình lớn lên của Khôi — được Bố Mẹ lưu lại để chia sẻ cùng gia đình.
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function FamilyPage() {
             { label: "Kỷ niệm", value: allEntries.filter(e => e.type === "MEMORY").length, color: "text-amber-500", onClick: undefined },
             { label: "Du lịch", value: travelEntries.length, color: "text-teal-500", onClick: undefined },
             { label: "Quốc gia", value: uniqueCountries || "–", color: "text-teal-400", onClick: uniqueCountries > 0 ? () => setShowCountriesModal(true) : undefined },
-            { label: "Học tập", value: allEntries.filter(e => ["EDUCATION","SKILL","SCHOOL"].includes(e.type)).length, color: "text-purple-500", onClick: undefined },
+            { label: "Học tập", value: allEntries.filter(e => ["EDUCATION","SKILL","SCHOOL"].includes(e.type)).length, color: "text-amber-700", onClick: undefined },
             { label: "Bạn bè", value: allEntries.filter(e => e.type === "FRIEND").length, color: "text-pink-500", onClick: undefined },
           ].map(s => (
             <button
@@ -203,7 +203,7 @@ export default function FamilyPage() {
               onClick={() => { setTab(t.value); setCountryFilter(""); }}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 tab === t.value && !countryFilter
-                  ? "bg-[#534AB7] text-white"
+                  ? "bg-amber-700 text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
             >
@@ -218,7 +218,7 @@ export default function FamilyPage() {
       <div className="max-w-lg mx-auto px-4 py-4 pb-10">
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="w-8 h-8 rounded-full border-2 border-[#534AB7] border-t-transparent animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-amber-700 border-t-transparent animate-spin" />
           </div>
         ) : displayedEntries.length === 0 ? (
           <div className="text-center py-16">

@@ -81,7 +81,7 @@ export default function ProfilePage() {
               </svg>
             </button>
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
-            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-purple-600 font-medium">Sửa</button>
+            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-amber-700 font-medium">Sửa</button>
             <button onClick={() => deleteEntry(selected.id)} className="text-sm text-red-400 font-medium">Xóa</button>
           </div>
 
@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
           <div className="px-4 py-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 ${selected.type === "INFO" ? "bg-purple-50" : "bg-green-50"}`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 ${selected.type === "INFO" ? "bg-amber-50" : "bg-green-50"}`}>
                 {selected.emoji || (selected.type === "INFO" ? "📋" : "🏥")}
               </div>
               <div>
@@ -168,30 +168,30 @@ export default function ProfilePage() {
 
       <div className="pt-5 pb-2">
         {/* Profile hero */}
-        <div className="mx-4 bg-[#534AB7] rounded-2xl overflow-hidden mb-5">
+        <div className="mx-4 bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden mb-5">
           <div className="flex items-center gap-4 px-4 pt-5 pb-5">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/30 shadow-lg">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-amber-200 shadow-sm">
               <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
             </div>
-            <div className="text-white">
-              <p className="font-bold text-xl leading-tight">Lê Minh Khôi</p>
-              <p className="text-purple-200 text-sm mt-1">{getKhoiAge()}</p>
-              <p className="text-purple-300 text-xs mt-0.5">Sinh ngày 22 tháng 6 năm 2022</p>
+            <div>
+              <p className="font-bold text-xl leading-tight text-amber-900">Lê Minh Khôi</p>
+              <p className="text-amber-700 text-sm mt-1">{getKhoiAge()}</p>
+              <p className="text-amber-600 text-xs mt-0.5">Sinh ngày 22 tháng 6 năm 2022</p>
             </div>
           </div>
 
           {(latestHeight || latestWeight) && (
-            <div className="grid grid-cols-2 border-t border-white/10">
+            <div className="grid grid-cols-2 border-t border-amber-200">
               {latestHeight && (
                 <div className="py-3 text-center">
-                  <p className="text-white font-bold text-xl leading-none">{String(latestHeight.metadata.height)} cm</p>
-                  <p className="text-purple-300 text-[10px] mt-1">Chiều cao</p>
+                  <p className="text-amber-800 font-bold text-xl leading-none">{String(latestHeight.metadata.height)} cm</p>
+                  <p className="text-amber-600 text-[10px] mt-1">Chiều cao</p>
                 </div>
               )}
               {latestWeight && (
-                <div className={`py-3 text-center ${latestHeight ? "border-l border-white/10" : ""}`}>
-                  <p className="text-white font-bold text-xl leading-none">{String(latestWeight.metadata.weight)} kg</p>
-                  <p className="text-purple-300 text-[10px] mt-1">Cân nặng</p>
+                <div className={`py-3 text-center ${latestHeight ? "border-l border-amber-200" : ""}`}>
+                  <p className="text-amber-800 font-bold text-xl leading-none">{String(latestWeight.metadata.weight)} kg</p>
+                  <p className="text-amber-600 text-[10px] mt-1">Cân nặng</p>
                 </div>
               )}
             </div>
@@ -202,7 +202,7 @@ export default function ProfilePage() {
         <div className="px-4 mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-700">📋 Thông tin cá nhân</h2>
-            <button onClick={() => openModal("INFO")} className="text-sm text-purple-600 font-medium">+ Thêm</button>
+            <button onClick={() => openModal("INFO")} className="text-sm text-amber-700 font-medium">+ Thêm</button>
           </div>
 
           {infoEntries.length === 0 ? (
@@ -210,7 +210,7 @@ export default function ProfilePage() {
               <p className="text-3xl mb-2">📋</p>
               <p className="text-sm text-gray-400">Chưa có thông tin nào</p>
               <p className="text-xs text-gray-300 mt-1">VD: màu yêu thích, món ăn, sở thích...</p>
-              <button onClick={() => openModal("INFO")} className="mt-3 text-sm text-purple-600 font-medium">
+              <button onClick={() => openModal("INFO")} className="mt-3 text-sm text-amber-700 font-medium">
                 Thêm thông tin →
               </button>
             </div>

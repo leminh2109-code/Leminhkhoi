@@ -14,8 +14,8 @@ import toast from "react-hot-toast";
 const TYPE_COLORS: Record<string, string> = {
   MEMORY: "bg-amber-50",
   TRAVEL: "bg-teal-50",
-  SKILL: "bg-purple-50",
-  EDUCATION: "bg-purple-50",
+  SKILL: "bg-amber-50",
+  EDUCATION: "bg-amber-50",
   BOOK: "bg-orange-50",
   SCHOOL: "bg-blue-50",
   FRIEND: "bg-pink-50",
@@ -25,8 +25,8 @@ const TYPE_COLORS: Record<string, string> = {
 const TYPE_DOT: Record<string, string> = {
   MEMORY: "bg-amber-400",
   TRAVEL: "bg-teal-500",
-  SKILL: "bg-purple-500",
-  EDUCATION: "bg-purple-500",
+  SKILL: "bg-amber-500",
+  EDUCATION: "bg-amber-500",
   BOOK: "bg-orange-400",
   SCHOOL: "bg-blue-500",
   FRIEND: "bg-pink-400",
@@ -116,7 +116,7 @@ export default function DashboardPage() {
     return (
       <PageShell>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-amber-700 border-t-transparent animate-spin" />
         </div>
       </PageShell>
     );
@@ -144,7 +144,7 @@ export default function DashboardPage() {
               </svg>
             </button>
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
-            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-purple-600 font-medium">Sửa</button>
+            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-amber-700 font-medium">Sửa</button>
             <button onClick={() => deleteEntry(selected.id)} className="text-sm text-red-400 font-medium">Xóa</button>
           </div>
           {selected.images.length > 0 && (
@@ -200,7 +200,7 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-400 mt-0.5">Xin chào, {session?.user?.name} 👋</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={handleShare} className="md:hidden flex items-center gap-1 text-sm text-purple-500 font-medium">
+            <button onClick={handleShare} className="md:hidden flex items-center gap-1 text-sm text-amber-700 font-medium">
               <span>🔗</span>
               <span>{shareCopied ? "Đã copy!" : "Chia sẻ"}</span>
             </button>
@@ -211,20 +211,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Hero card — photo + name + stats tất cả trong một */}
-        <div className="mx-4 bg-[#534AB7] rounded-2xl overflow-hidden mb-5">
+        <div className="mx-4 bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden mb-5">
           <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/30 shadow-lg">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-amber-200 shadow-sm">
               <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
             </div>
-            <div className="text-white">
-              <p className="font-bold text-lg leading-tight">Lê Minh Khôi</p>
-              <p className="text-purple-200 text-sm mt-0.5">{getKhoiAge()}</p>
-              <p className="text-purple-300 text-xs mt-0.5">Sinh 6/2/2022</p>
+            <div>
+              <p className="font-bold text-lg leading-tight text-amber-900">Lê Minh Khôi</p>
+              <p className="text-amber-700 text-sm mt-0.5">{getKhoiAge()}</p>
+              <p className="text-amber-600 text-xs mt-0.5">Sinh 6/2/2022</p>
             </div>
           </div>
 
           {/* Stats row inside hero */}
-          <div className="grid grid-cols-5 border-t border-white/10">
+          <div className="grid grid-cols-5 border-t border-amber-200">
             {[
               { label: "Kỷ niệm", value: stats.memories, href: "/memories", onClick: undefined },
               { label: "Du lịch", value: stats.travel, href: "/travel", onClick: undefined },
@@ -234,16 +234,16 @@ export default function DashboardPage() {
             ].map((s, i) => {
               const inner = (
                 <div className="py-3 text-center">
-                  <p className="text-white font-bold text-lg leading-none">{s.value}</p>
-                  <p className="text-purple-300 text-[9px] mt-1 leading-tight">{s.label}</p>
+                  <p className="text-amber-800 font-bold text-lg leading-none">{s.value}</p>
+                  <p className="text-amber-600 text-[9px] mt-1 leading-tight">{s.label}</p>
                 </div>
               );
               return s.href ? (
-                <Link key={i} href={s.href} className={`${i > 0 ? "border-l border-white/10" : ""} active:bg-white/10 transition`}>
+                <Link key={i} href={s.href} className={`${i > 0 ? "border-l border-amber-200" : ""} active:bg-amber-100 transition`}>
                   {inner}
                 </Link>
               ) : (
-                <button key={i} onClick={s.onClick} className={`${i > 0 ? "border-l border-white/10" : ""} active:bg-white/10 transition w-full`}>
+                <button key={i} onClick={s.onClick} className={`${i > 0 ? "border-l border-amber-200" : ""} active:bg-amber-100 transition w-full`}>
                   {inner}
                 </button>
               );
@@ -321,7 +321,7 @@ export default function DashboardPage() {
           <div className="mb-5">
             <div className="flex items-center justify-between px-4 mb-2">
               <h2 className="text-sm font-semibold text-gray-700">📚 Học tập</h2>
-              <Link href="/education" className="text-xs text-purple-500 font-medium">Xem tất cả →</Link>
+              <Link href="/education" className="text-xs text-amber-700 font-medium">Xem tất cả →</Link>
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
               {educationSlide.map((entry) => (
@@ -343,7 +343,7 @@ export default function DashboardPage() {
         <div className="px-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-700">🕐 Gần đây</h2>
-            <button onClick={() => setShowModal(true)} className="text-sm text-purple-600 font-medium">
+            <button onClick={() => setShowModal(true)} className="text-sm text-amber-700 font-medium">
               + Thêm mới
             </button>
           </div>
@@ -352,7 +352,7 @@ export default function DashboardPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
               <p className="text-3xl mb-2">📝</p>
               <p className="text-sm text-gray-400">Chưa có ghi chép nào.</p>
-              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-purple-600 font-medium">
+              <button onClick={() => setShowModal(true)} className="mt-3 text-sm text-amber-700 font-medium">
                 Thêm kỷ niệm đầu tiên →
               </button>
             </div>

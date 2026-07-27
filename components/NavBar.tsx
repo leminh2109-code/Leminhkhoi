@@ -48,7 +48,7 @@ export function NavBar() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   active
-                    ? "bg-purple-50 text-[#534AB7]"
+                    ? "bg-amber-50 text-amber-700"
                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 )}
               >
@@ -62,7 +62,7 @@ export function NavBar() {
         {/* Share button at bottom of sidebar */}
         <button
           onClick={handleShare}
-          className="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-purple-500 hover:bg-purple-50 transition w-full"
+          className="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition w-full"
         >
           <span className="text-lg leading-none">🔗</span>
           {copied ? "✓ Đã copy link!" : "Chia sẻ với gia đình"}
@@ -70,7 +70,7 @@ export function NavBar() {
       </aside>
 
       {/* Mobile: bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#534AB7] safe-bottom z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#B45309] safe-bottom z-50">
         <div className="flex justify-around px-1 pt-2 pb-4">
           {navItems.map((item) => {
             const active = pathname === item.href;

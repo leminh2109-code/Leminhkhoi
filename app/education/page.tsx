@@ -83,7 +83,7 @@ export default function EducationPage() {
           <h1 className="text-xl font-semibold text-gray-900">Học tập</h1>
           <button
             onClick={() => openModal(tab)}
-            className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-lg font-light"
+            className="w-8 h-8 rounded-full bg-amber-700 text-white flex items-center justify-center text-lg font-light"
           >
             +
           </button>
@@ -97,7 +97,7 @@ export default function EducationPage() {
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition flex-shrink-0 ${
                 tab === t.id
-                  ? "bg-purple-600 text-white"
+                  ? "bg-amber-700 text-white"
                   : "bg-white text-gray-500 border border-gray-200"
               }`}
             >
@@ -139,7 +139,7 @@ export default function EducationPage() {
                     <div className="flex border-t border-gray-50">
                       <button
                         onClick={() => setEditingEntry(e)}
-                        className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                        className="flex-1 py-2 text-xs text-amber-700 font-medium hover:bg-amber-50 transition"
                       >
                         Sửa
                       </button>
@@ -190,7 +190,7 @@ export default function EducationPage() {
                   <div className="flex border-t border-gray-50">
                     <button
                       onClick={() => setEditingEntry(e)}
-                      className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                      className="flex-1 py-2 text-xs text-amber-700 font-medium hover:bg-amber-50 transition"
                     >
                       Sửa
                     </button>
@@ -218,7 +218,7 @@ export default function EducationPage() {
                 <div key={e.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                   <div className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-xl flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-xl flex-shrink-0">
                         🏫
                       </div>
                       <div className="flex-1">
@@ -227,7 +227,7 @@ export default function EducationPage() {
                           <p className="text-xs text-gray-500 mt-0.5">{String(e.metadata.schoolName)}</p>
                         )}
                         {!!e.metadata.class && (
-                          <p className="text-xs text-purple-500 mt-0.5">{String(e.metadata.class)}</p>
+                          <p className="text-xs text-amber-700 mt-0.5">{String(e.metadata.class)}</p>
                         )}
                         <p className="text-xs text-gray-400 mt-1">
                           Từ {formatDateRange(e.date, e.metadata.endDate as string)}
@@ -241,7 +241,7 @@ export default function EducationPage() {
                   <div className="flex border-t border-gray-50">
                     <button
                       onClick={() => setEditingEntry(e)}
-                      className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                      className="flex-1 py-2 text-xs text-amber-700 font-medium hover:bg-amber-50 transition"
                     >
                       Sửa
                     </button>
@@ -268,7 +268,7 @@ function EmptyState({ emoji, text, onAdd }: { emoji: string; text: string; onAdd
     <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
       <p className="text-3xl mb-2">{emoji}</p>
       <p className="text-sm text-gray-400">{text}</p>
-      <button onClick={onAdd} className="mt-3 text-sm text-purple-600 font-medium">
+      <button onClick={onAdd} className="mt-3 text-sm text-amber-700 font-medium">
         Thêm ngay →
       </button>
     </div>

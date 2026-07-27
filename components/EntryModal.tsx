@@ -199,7 +199,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="text-sm font-semibold text-purple-600 disabled:opacity-50"
+          className="text-sm font-semibold text-amber-700 disabled:opacity-50"
         >
           {saving ? "Lưu..." : "Lưu"}
         </button>
@@ -217,8 +217,8 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                   onClick={() => setType(opt.value)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
                     type === opt.value
-                      ? "bg-purple-600 text-white border-purple-600"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
+                      ? "bg-amber-700 text-white border-amber-700"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-amber-300"
                   }`}
                 >
                   <span>{opt.emoji}</span>
@@ -236,7 +236,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Ví dụ: Lần đầu đi biển"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
           />
         </div>
 
@@ -249,7 +249,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -258,7 +258,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value)}
                 placeholder="🎂"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition text-center text-xl"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition text-center text-xl"
                 maxLength={4}
               />
             </div>
@@ -272,7 +272,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               min={date}
-              className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
             />
           </div>
         </div>
@@ -299,7 +299,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                       setMetadata((m) => ({ ...m, country: val, location: "", locations: "[]" }));
                     }
                   }}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition bg-white"
                 >
                   <option value="">-- Chọn quốc gia --</option>
                   {COUNTRY_LIST.map((c) => (
@@ -312,7 +312,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                     value={countryVal}
                     onChange={(e) => setMetadata((m) => ({ ...m, country: e.target.value }))}
                     placeholder="Nhập tên quốc gia"
-                    className="w-full mt-2 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                    className="w-full mt-2 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
                     autoFocus
                   />
                 )}
@@ -342,7 +342,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                       onChange={(e) => setNewLocationInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTravelLocation(); } }}
                       placeholder="Nhập thành phố, tỉnh..."
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
                     />
                     <button
                       type="button"
@@ -391,7 +391,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                   type="checkbox"
                   checked={metadata.isFirstTime === "true"}
                   onChange={(e) => setMetadata((m) => ({ ...m, isFirstTime: e.target.checked ? "true" : "false" }))}
-                  className="w-4 h-4 accent-purple-600"
+                  className="w-4 h-4 accent-amber-700"
                 />
                 <span className="text-sm text-gray-700">Lần đầu đến đây</span>
               </label>
@@ -405,7 +405,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
             <select
               value={metadata.status || "IN_PROGRESS"}
               onChange={(e) => setMetadata((m) => ({ ...m, status: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition bg-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition bg-white"
             >
               <option value="IN_PROGRESS">Đang học</option>
               <option value="DONE">Đã xong</option>
@@ -421,7 +421,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.schoolName || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, schoolName: e.target.value }))}
                 placeholder="Mầm non ABC"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -430,7 +430,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.class || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, class: e.target.value }))}
                 placeholder="Lớp lá"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
           </div>
@@ -443,7 +443,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
               value={metadata.bookAuthor || ""}
               onChange={(e) => setMetadata((m) => ({ ...m, bookAuthor: e.target.value }))}
               placeholder="Tên tác giả"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
             />
           </div>
         )}
@@ -456,7 +456,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.address || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, address: e.target.value }))}
                 placeholder="Số nhà, đường, quận, thành phố..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -465,7 +465,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.fatherName || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, fatherName: e.target.value }))}
                 placeholder="Tên bố của bạn"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -474,7 +474,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.motherName || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, motherName: e.target.value }))}
                 placeholder="Tên mẹ của bạn"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -483,7 +483,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.phone || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, phone: e.target.value }))}
                 placeholder="0901 234 567"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
           </div>
@@ -499,7 +499,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                   value={metadata.height || ""}
                   onChange={(e) => setMetadata((m) => ({ ...m, height: e.target.value }))}
                   placeholder="105"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
                 />
               </div>
               <div>
@@ -509,7 +509,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                   value={metadata.weight || ""}
                   onChange={(e) => setMetadata((m) => ({ ...m, weight: e.target.value }))}
                   placeholder="18"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
                 />
               </div>
             </div>
@@ -519,7 +519,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.doctor || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, doctor: e.target.value }))}
                 placeholder="BS. Nguyễn Văn A — BV Nhi Đồng"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -528,7 +528,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.diagnosis || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, diagnosis: e.target.value }))}
                 placeholder="Khám định kỳ, sốt, tiêm vaccine..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
             <div>
@@ -537,7 +537,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
                 value={metadata.medication || ""}
                 onChange={(e) => setMetadata((m) => ({ ...m, medication: e.target.value }))}
                 placeholder="Paracetamol 250mg, vitamin D..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition"
               />
             </div>
           </div>
@@ -551,7 +551,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Câu chuyện, cảm xúc, chi tiết thú vị..."
             rows={4}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-300 transition resize-none"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-300 transition resize-none"
           />
         </div>
 
@@ -602,7 +602,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="w-20 h-20 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-purple-300 hover:text-purple-400 transition"
+              className="w-20 h-20 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-amber-300 hover:text-amber-600 transition"
             >
               {uploading ? (
                 <span className="text-xs">...</span>

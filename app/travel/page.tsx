@@ -8,6 +8,7 @@ import { EntryModal } from "@/components/EntryModal";
 import { Entry } from "@/lib/types";
 import { formatDateRange, getTravelLocations } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import { VietnamMap } from "@/components/VietnamMap";
 import toast from "react-hot-toast";
 
 export default function TravelPage() {
@@ -150,7 +151,7 @@ function TravelPageInner() {
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
             <button
               onClick={() => { setEditingEntry(selected); setSelected(null); }}
-              className="text-sm text-purple-600 font-medium"
+              className="text-sm text-amber-700 font-medium"
             >
               Sửa
             </button>
@@ -260,6 +261,17 @@ function TravelPageInner() {
                 <p className="text-teal-200 text-xs mt-0.5">Quốc gia</p>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Vietnam map — chỉ hiện khi không filter, có entries VN */}
+        {!countryFilter && !locationFilter && entries.some(e => !e.metadata.country || String(e.metadata.country).includes("Việt")) && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
+            <p className="text-sm font-semibold text-gray-700 mb-3">🗺️ Bản đồ Việt Nam</p>
+            <VietnamMap
+              entries={entries}
+              onLocationClick={(loc) => setLocationFilter(loc)}
+            />
           </div>
         )}
 

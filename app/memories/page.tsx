@@ -69,7 +69,7 @@ export default function MemoriesPage() {
             <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
             <button
               onClick={() => { setEditingEntry(selected); setSelected(null); }}
-              className="text-sm text-purple-600 font-medium"
+              className="text-sm text-amber-700 font-medium"
             >
               Sửa
             </button>
@@ -165,7 +165,7 @@ export default function MemoriesPage() {
                 <div className="flex border-t border-gray-50">
                   <button
                     onClick={() => setEditingEntry(entry)}
-                    className="flex-1 py-2 text-xs text-purple-500 font-medium hover:bg-purple-50 transition"
+                    className="flex-1 py-2 text-xs text-amber-700 font-medium hover:bg-amber-50 transition"
                   >
                     Sửa
                   </button>
