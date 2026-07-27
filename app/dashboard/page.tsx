@@ -52,21 +52,39 @@ export default function DashboardPage() {
   const [coverTy, setCoverTy] = useState(0);
   const [coverScale, setCoverScale] = useState(1);
   const [editingCover, setEditingCover] = useState(false);
+  // Natural image size — set in onLoad so we can position the img explicitly
+  const [imgNatural, setImgNatural] = useState({ w: 0, h: 0 });
   const coverContainerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const coverFileRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef({ tx: 0, ty: 0, scale: 1, image: "/khoi1.jpeg" });
   const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
   const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
 
+  // Compute rendered image dimensions: scale=1 means "cover" (fill the container)
+  function getImgSize(scale: number) {
+    const cW = coverContainerRef.current?.clientWidth ?? 375;
+    const cH = coverContainerRef.current?.clientHeight ?? 220;
+    if (!imgNatural.w || !imgNatural.h) return { w: cW, h: cH, cW, cH };
+    const norm = Math.max(cW / imgNatural.w, cH / imgNatural.h); // scale-to-cover factor
+    return { w: imgNatural.w * norm * scale, h: imgNatural.h * norm * scale, cW, cH };
+  }
+
   function clampTranslate(tx: number, ty: number, scale: number) {
-    const W = coverContainerRef.current?.clientWidth ?? 375;
-    const H = coverContainerRef.current?.clientHeight ?? 220;
-    const maxTx = (W * (scale - 1)) / 2;
-    const maxTy = (H * (scale - 1)) / 2;
+    const { w, h, cW, cH } = getImgSize(scale);
+    // When image fills/overflows container: don't show background at edges
+    // When image is smaller (zoomed out): allow centering with some play
+    const maxTx = w >= cW ? (w - cW) / 2 : (cW - w) / 2;
+    const maxTy = h >= cH ? (h - cH) / 2 : (cH - h) / 2;
     return {
       tx: Math.max(-maxTx, Math.min(maxTx, tx)),
       ty: Math.max(-maxTy, Math.min(maxTy, ty)),
     };
+  }
+
+  function onCoverImgLoad() {
+    if (!imgRef.current) return;
+    setImgNatural({ w: imgRef.current.naturalWidth, h: imgRef.current.naturalHeight });
   }
 
   useEffect(() => {
@@ -105,6 +123,7 @@ export default function DashboardPage() {
     if (res.ok) {
       const { url } = await res.json();
       setCoverImage(url);
+      setImgNatural({ w: 0, h: 0 }); // reset until new image loads
       setCoverTx(0); setCoverTy(0); setCoverScale(1);
       coverRef.current = { tx: 0, ty: 0, scale: 1, image: url };
       toast.success("Đã đổi ảnh bìa!", { id: toastId });
@@ -149,7 +168,8 @@ export default function DashboardPage() {
   function onCoverTouchMove(e: React.TouchEvent) {
     if (e.touches.length === 2 && pinchRef.current) {
       const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-      applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(1, Math.min(4, pinchRef.current.scale * (dist / pinchRef.current.dist))));
+      applyTransform(coverRef.current.tx, coverRef.current.ty,
+        Math.max(0.3, Math.min(5, pinchRef.current.scale * (dist / pinchRef.current.dist))));
     } else {
       onCoverDragMove(e);
     }
@@ -161,7 +181,7 @@ export default function DashboardPage() {
   }
 
   function setZoom(value: number) {
-    applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(1, Math.min(4, value)));
+    applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(0.3, Math.min(5, value)));
   }
 
   function saveCoverPos() {
@@ -320,6 +340,7 @@ export default function DashboardPage() {
         className="relative w-full overflow-hidden select-none"
         style={{
           height: 220,
+          backgroundColor: "#000",
           cursor: editingCover ? "grab" : undefined,
           touchAction: editingCover ? "none" : undefined,
         }}
@@ -331,17 +352,33 @@ export default function DashboardPage() {
         onTouchMove={editingCover ? onCoverTouchMove : undefined}
         onTouchEnd={editingCover ? onCoverPointerEnd : undefined}
       >
-        <img
-          src={coverImage}
-          alt="cover"
-          draggable={false}
-          className="w-full h-full object-cover"
-          style={{
-            transform: `translate(${coverTx}px, ${coverTy}px) scale(${coverScale})`,
-            transformOrigin: "center center",
-            willChange: "transform",
-          }}
-        />
+        {(() => {
+          const { w: iW, h: iH } = getImgSize(coverScale);
+          const loaded = imgNatural.w > 0;
+          return (
+            <img
+              ref={imgRef}
+              onLoad={onCoverImgLoad}
+              src={coverImage}
+              alt="cover"
+              draggable={false}
+              style={loaded ? {
+                position: "absolute",
+                width: iW,
+                height: iH,
+                objectFit: "none",
+                left: `calc(50% + ${coverTx}px)`,
+                top: `calc(50% + ${coverTy}px)`,
+                transform: "translate(-50%, -50%)",
+                willChange: "width, height, left, top",
+              } : {
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          );
+        })()}
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
         {/* Edit mode overlay */}
@@ -376,7 +413,7 @@ export default function DashboardPage() {
                   <circle cx="11" cy="11" r="4"/><path d="M20 20l-4-4"/>
                 </svg>
                 <input
-                  type="range" min="1" max="4" step="0.02"
+                  type="range" min="0.3" max="5" step="0.02"
                   value={coverScale}
                   onChange={(e) => setZoom(parseFloat(e.target.value))}
                   className="flex-1"
