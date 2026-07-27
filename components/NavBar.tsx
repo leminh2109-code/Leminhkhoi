@@ -109,6 +109,16 @@ export function NavBar() {
               </Link>
             );
           })}
+          {/* Share */}
+          <button
+            onClick={handleShare}
+            className="flex flex-col items-center gap-0.5 flex-1 py-1.5 px-2 rounded-xl text-gray-400"
+          >
+            <span className="text-2xl leading-none">🔗</span>
+            <span className="text-[10px] font-semibold leading-tight">
+              {copied ? "✓ Xong" : "Chia sẻ"}
+            </span>
+          </button>
           {/* Theme toggle */}
           <button
             onClick={toggle}

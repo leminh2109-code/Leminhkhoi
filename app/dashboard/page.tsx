@@ -316,14 +316,9 @@ export default function DashboardPage() {
               Xong
             </button>
           ) : (
-            <div className="flex items-center gap-3">
-              <button onClick={handleShare} className="text-amber-300 text-sm font-medium">
-                {shareCopied ? "✓ Đã copy!" : "🔗 Chia sẻ"}
-              </button>
-              <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
-                Đăng xuất
-              </button>
-            </div>
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
+              Đăng xuất
+            </button>
           )}
         </div>
 
