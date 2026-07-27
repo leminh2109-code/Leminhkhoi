@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ImageLightboxProps {
   images: string[];
@@ -10,6 +10,7 @@ interface ImageLightboxProps {
 
 export function ImageLightbox({ images, index, onClose }: ImageLightboxProps) {
   const [current, setCurrent] = useState(index);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -21,10 +22,25 @@ export function ImageLightbox({ images, index, onClose }: ImageLightboxProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [images.length, onClose]);
 
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 50) return;
+    if (delta < 0) setCurrent((c) => Math.min(c + 1, images.length - 1));
+    else setCurrent((c) => Math.max(c - 1, 0));
+  }
+
   return (
     <div
       className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center"
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Close */}
       <button
