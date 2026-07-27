@@ -106,7 +106,7 @@ export default function JapanMapInner({ entries, onLocationClick }: Props) {
       if (seenCoords.has(coordKey)) continue;
 
       const cityNorm = normalize(city);
-      const matched = [...allLocsNorm].some(
+      const matched = Array.from(allLocsNorm).some(
         (locNorm) => locNorm.includes(cityNorm) || cityNorm.includes(locNorm)
       );
 
