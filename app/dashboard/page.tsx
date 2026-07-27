@@ -48,84 +48,31 @@ export default function DashboardPage() {
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   const [coverImage, setCoverImage] = useState("/khoi1.jpeg");
-  const [coverTx, setCoverTx] = useState(0);
-  const [coverTy, setCoverTy] = useState(0);
-  const [coverScale, setCoverScale] = useState(1);
+  const [coverPos, setCoverPos] = useState({ x: 50, y: 0 });
   const [editingCover, setEditingCover] = useState(false);
-  // imgBase: image dimensions at scale=1 (cover = fill the container exactly)
-  const [imgBase, setImgBase] = useState({ w: 0, h: 0 });
-  // minScale: scale at which the full image is visible (no black bars)
-  const [minScale, setMinScale] = useState(0.3);
-  const minScaleRef = useRef(0.3);
-  const coverContainerRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
   const coverFileRef = useRef<HTMLInputElement>(null);
-  const coverRef = useRef({ tx: 0, ty: 0, scale: 1, image: "/khoi1.jpeg" });
-  const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
-  const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
-
-  function clampTranslate(tx: number, ty: number, scale: number) {
-    const cW = coverContainerRef.current?.clientWidth ?? 375;
-    const cH = coverContainerRef.current?.clientHeight ?? 220;
-    const bW = imgBase.w || cW;
-    const bH = imgBase.h || cH;
-    const w = bW * scale;
-    const h = bH * scale;
-    // When image overflows: keep edges inside container
-    // When image is smaller than container: center it with some play
-    const maxTx = w >= cW ? (w - cW) / 2 : (cW - w) / 2;
-    const maxTy = h >= cH ? (h - cH) / 2 : (cH - h) / 2;
-    return {
-      tx: Math.max(-maxTx, Math.min(maxTx, tx)),
-      ty: Math.max(-maxTy, Math.min(maxTy, ty)),
-    };
-  }
-
-  function onCoverImgLoad() {
-    const el = imgRef.current;
-    const con = coverContainerRef.current;
-    if (!el || !con) return;
-    const { naturalWidth: iW, naturalHeight: iH } = el;
-    const cW = con.clientWidth || 375;
-    const cH = con.clientHeight || 220;
-    // Compute the "cover" base size (scale=1 fills the container)
-    const norm = Math.max(cW / iW, cH / iH);
-    const baseW = iW * norm;
-    const baseH = iH * norm;
-    setImgBase({ w: baseW, h: baseH });
-    // minScale = scale at which full image just fits (contain)
-    const minS = Math.min(cW / baseW, cH / baseH);
-    setMinScale(minS);
-    minScaleRef.current = minS;
-    // If DB had a stale scale below the contain level, reset to 1 (fill container)
-    if (coverRef.current.scale < minS) {
-      setCoverTx(0); setCoverTy(0); setCoverScale(1);
-      coverRef.current = { ...coverRef.current, tx: 0, ty: 0, scale: 1 };
-    }
-  }
+  const dragRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null);
+  const coverPosRef = useRef({ x: 50, y: 0 });
 
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (!data) return;
-        const img = data.image ?? "/khoi1.jpeg";
-        const tx = data.tx ?? 0;
-        const ty = data.ty ?? 0;
-        const scale = data.scale ?? 1;
-        if (data.image) setCoverImage(img);
-        setCoverTx(tx); setCoverTy(ty); setCoverScale(scale);
-        coverRef.current = { tx, ty, scale, image: img };
+        if (data.image) setCoverImage(data.image);
+        if (data.pos) {
+          setCoverPos(data.pos);
+          coverPosRef.current = data.pos;
+        }
       })
       .catch(() => {});
   }, []);
 
-  async function saveCoverToServer() {
-    const { tx, ty, scale, image } = coverRef.current;
+  async function saveCoverToServer(image: string, pos: { x: number; y: number }) {
     await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image, tx, ty, scale }),
+      body: JSON.stringify({ image, pos }),
     });
   }
 
@@ -139,71 +86,44 @@ export default function DashboardPage() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     if (res.ok) {
       const { url } = await res.json();
+      const newPos = { x: 50, y: 30 };
       setCoverImage(url);
-      setImgBase({ w: 0, h: 0 }); // reset until new image loads
-      setCoverTx(0); setCoverTy(0); setCoverScale(1);
-      coverRef.current = { tx: 0, ty: 0, scale: 1, image: url };
+      setCoverPos(newPos);
+      coverPosRef.current = newPos;
+      setEditingCover(true);
       toast.success("Đã đổi ảnh bìa!", { id: toastId });
+      saveCoverToServer(url, newPos);
     } else {
       toast.error("Upload thất bại", { id: toastId });
     }
   }
 
-  function applyTransform(tx: number, ty: number, scale: number) {
-    const c = clampTranslate(tx, ty, scale);
-    coverRef.current = { ...coverRef.current, ...c, scale };
-    setCoverTx(c.tx); setCoverTy(c.ty); setCoverScale(scale);
-  }
-
   function onCoverDragStart(e: React.MouseEvent | React.TouchEvent) {
     const pt = "touches" in e ? e.touches[0] : e;
-    dragRef.current = { startX: pt.clientX, startY: pt.clientY, tx: coverRef.current.tx, ty: coverRef.current.ty };
+    dragRef.current = { startX: pt.clientX, startY: pt.clientY, posX: coverPosRef.current.x, posY: coverPosRef.current.y };
   }
 
   function onCoverDragMove(e: React.MouseEvent | React.TouchEvent) {
     if (!dragRef.current) return;
     const pt = "touches" in e ? e.touches[0] : e;
-    applyTransform(
-      dragRef.current.tx + (pt.clientX - dragRef.current.startX),
-      dragRef.current.ty + (pt.clientY - dragRef.current.startY),
-      coverRef.current.scale,
-    );
+    const dx = pt.clientX - dragRef.current.startX;
+    const dy = pt.clientY - dragRef.current.startY;
+    const newX = Math.max(0, Math.min(100, dragRef.current.posX - dx * 0.15));
+    const newY = Math.max(0, Math.min(100, dragRef.current.posY - dy * 0.15));
+    const newPos = { x: newX, y: newY };
+    coverPosRef.current = newPos;
+    setCoverPos(newPos);
   }
 
-  function onCoverTouchStart(e: React.TouchEvent) {
-    if (e.touches.length === 2) {
-      pinchRef.current = {
-        dist: Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY),
-        scale: coverRef.current.scale,
-      };
-      dragRef.current = null;
-    } else {
-      onCoverDragStart(e);
-    }
-  }
-
-  function onCoverTouchMove(e: React.TouchEvent) {
-    if (e.touches.length === 2 && pinchRef.current) {
-      const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-      applyTransform(coverRef.current.tx, coverRef.current.ty,
-        Math.max(minScaleRef.current, Math.min(5, pinchRef.current.scale * (dist / pinchRef.current.dist))));
-    } else {
-      onCoverDragMove(e);
-    }
-  }
-
-  function onCoverPointerEnd() {
+  function onCoverDragEnd() {
+    if (!dragRef.current) return;
     dragRef.current = null;
-    pinchRef.current = null;
-  }
-
-  function setZoom(value: number) {
-    applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(minScaleRef.current, Math.min(5, value)));
   }
 
   function saveCoverPos() {
+    dragRef.current = null;
     setEditingCover(false);
-    saveCoverToServer();
+    saveCoverToServer(coverImage, coverPosRef.current);
   }
 
   async function handleShare() {
@@ -353,117 +273,56 @@ export default function DashboardPage() {
 
       {/* ── COVER IMAGE HERO ── */}
       <div
-        ref={coverContainerRef}
         className="relative w-full overflow-hidden select-none"
         style={{
           height: 220,
-          backgroundColor: "#000",
           cursor: editingCover ? "grab" : undefined,
           touchAction: editingCover ? "none" : undefined,
         }}
         onMouseDown={editingCover ? onCoverDragStart : undefined}
         onMouseMove={editingCover ? onCoverDragMove : undefined}
-        onMouseUp={editingCover ? onCoverPointerEnd : undefined}
-        onMouseLeave={editingCover ? onCoverPointerEnd : undefined}
-        onTouchStart={editingCover ? onCoverTouchStart : undefined}
-        onTouchMove={editingCover ? onCoverTouchMove : undefined}
-        onTouchEnd={editingCover ? onCoverPointerEnd : undefined}
+        onMouseUp={editingCover ? onCoverDragEnd : undefined}
+        onMouseLeave={editingCover ? onCoverDragEnd : undefined}
+        onTouchStart={editingCover ? onCoverDragStart : undefined}
+        onTouchMove={editingCover ? onCoverDragMove : undefined}
+        onTouchEnd={editingCover ? onCoverDragEnd : undefined}
       >
-        {(() => {
-          const loaded = imgBase.w > 0;
-          const iW = imgBase.w * coverScale;
-          const iH = imgBase.h * coverScale;
-          return (
-            <img
-              ref={imgRef}
-              onLoad={onCoverImgLoad}
-              src={coverImage}
-              alt="cover"
-              draggable={false}
-              style={loaded ? {
-                position: "absolute",
-                width: iW,
-                height: iH,
-                objectFit: "none",
-                left: `calc(50% + ${coverTx}px)`,
-                top: `calc(50% + ${coverTy}px)`,
-                transform: "translate(-50%, -50%)",
-                willChange: "width, height, left, top",
-              } : {
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          );
-        })()}
+        <img
+          src={coverImage}
+          alt="cover"
+          draggable={false}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: `${coverPos.x}% ${coverPos.y}%` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-        {/* Edit mode overlay */}
+        {/* Drag hint shown while repositioning */}
         {editingCover && (
-          <>
-            {/* Hint */}
-            <div className="absolute inset-x-0 top-1/3 flex items-center justify-center pointer-events-none">
-              <div className="bg-black/55 rounded-full px-4 py-1.5 text-white text-xs font-medium">
-                ↔ Kéo · Pinch để zoom
-              </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
+            <div className="bg-black/50 rounded-full px-4 py-2 text-white text-sm font-medium">
+              ↔ Kéo để di chuyển ảnh
             </div>
-
-            {/* Bottom edit bar */}
-            <div
-              className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 pb-4 pt-8"
-              style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 60%, transparent)" }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-            >
-              {/* Change photo */}
-              <button
-                onClick={() => coverFileRef.current?.click()}
-                className="flex-shrink-0 w-9 h-9 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-lg backdrop-blur-sm active:scale-95 transition-transform"
-                title="Đổi ảnh"
-              >
-                📷
-              </button>
-
-              {/* Zoom slider */}
-              <div className="flex-1 flex items-center gap-2">
-                <svg className="w-4 h-4 text-white/70 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="11" cy="11" r="4"/><path d="M20 20l-4-4"/>
-                </svg>
-                <input
-                  type="range" min={minScale} max="5" step="0.02"
-                  value={coverScale}
-                  onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  className="flex-1"
-                  style={{ accentColor: "#f59e0b", height: 4 }}
-                />
-                <svg className="w-5 h-5 text-white flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>
-                </svg>
-              </div>
-
-              {/* Done */}
-              <button
-                onClick={saveCoverPos}
-                className="flex-shrink-0 bg-amber-400 text-black text-sm font-bold rounded-full px-4 py-1.5 shadow-lg active:scale-95 transition-transform"
-              >
-                Xong
-              </button>
-            </div>
-          </>
+          </div>
         )}
 
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12">
           <p className="text-white font-bold text-base tracking-wide">Nhật ký Khôi</p>
-          {!editingCover && (
+          {editingCover ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); saveCoverPos(); }}
+              className="bg-white text-gray-900 text-sm font-semibold rounded-full px-4 py-1.5 shadow-lg"
+            >
+              Xong
+            </button>
+          ) : (
             <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
               Đăng xuất
             </button>
           )}
         </div>
 
-        {/* Profile + name + edit button at bottom (normal mode) */}
+        {/* Profile + name + edit cover button at bottom */}
         {!editingCover && (
           <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 px-4 pb-4">
             <div className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-amber-400 shadow-lg">
@@ -474,10 +333,10 @@ export default function DashboardPage() {
               <p className="text-amber-300 text-xs mt-0.5">{getKhoiAge()} · Sinh 6/2/2022</p>
             </div>
             <button
-              onClick={() => setEditingCover(true)}
+              onClick={() => coverFileRef.current?.click()}
               className="flex-shrink-0 bg-black/40 backdrop-blur-sm text-white text-xs font-semibold rounded-full px-3 py-1.5 border border-white/30 active:scale-95 transition-transform"
             >
-              ✏️ Sửa ảnh
+              📷 Đổi ảnh
             </button>
           </div>
         )}
