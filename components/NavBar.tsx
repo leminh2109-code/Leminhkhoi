@@ -61,10 +61,19 @@ export function NavBar() {
           })}
         </nav>
 
+        {/* Theme toggle */}
+        <button
+          onClick={toggle}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition w-full"
+        >
+          <span className="text-lg leading-none">{theme === "dark" ? "☀️" : "🌙"}</span>
+          {theme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+        </button>
+
         {/* Share button at bottom of sidebar */}
         <button
           onClick={handleShare}
-          className="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition w-full"
+          className="mt-1 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition w-full"
         >
           <span className="text-lg leading-none">🔗</span>
           {copied ? "✓ Đã copy link!" : "Chia sẻ với gia đình"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -46,6 +46,78 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [shareCopied, setShareCopied] = useState(false);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
+  const [coverImage, setCoverImage] = useState("/khoi1.jpeg");
+  const [coverPos, setCoverPos] = useState({ x: 50, y: 0 });
+  const [editingCover, setEditingCover] = useState(false);
+  const coverFileRef = useRef<HTMLInputElement>(null);
+  const dragRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null);
+  const coverPosRef = useRef({ x: 50, y: 0 });
+
+  useEffect(() => {
+    const img = localStorage.getItem("coverImage");
+    const pos = localStorage.getItem("coverPos");
+    if (img) setCoverImage(img);
+    if (pos) {
+      try {
+        const p = JSON.parse(pos);
+        setCoverPos(p);
+        coverPosRef.current = p;
+      } catch {}
+    }
+  }, []);
+
+  async function handleCoverFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    const toastId = toast.loading("Đang tải ảnh...");
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (res.ok) {
+      const { url } = await res.json();
+      const newPos = { x: 50, y: 30 };
+      setCoverImage(url);
+      setCoverPos(newPos);
+      coverPosRef.current = newPos;
+      localStorage.setItem("coverImage", url);
+      localStorage.setItem("coverPos", JSON.stringify(newPos));
+      setEditingCover(true);
+      toast.success("Đã đổi ảnh bìa!", { id: toastId });
+    } else {
+      toast.error("Upload thất bại", { id: toastId });
+    }
+  }
+
+  function onCoverDragStart(e: React.MouseEvent | React.TouchEvent) {
+    const pt = "touches" in e ? e.touches[0] : e;
+    dragRef.current = { startX: pt.clientX, startY: pt.clientY, posX: coverPosRef.current.x, posY: coverPosRef.current.y };
+  }
+
+  function onCoverDragMove(e: React.MouseEvent | React.TouchEvent) {
+    if (!dragRef.current) return;
+    const pt = "touches" in e ? e.touches[0] : e;
+    const dx = pt.clientX - dragRef.current.startX;
+    const dy = pt.clientY - dragRef.current.startY;
+    const newX = Math.max(0, Math.min(100, dragRef.current.posX - dx * 0.15));
+    const newY = Math.max(0, Math.min(100, dragRef.current.posY - dy * 0.15));
+    const newPos = { x: newX, y: newY };
+    coverPosRef.current = newPos;
+    setCoverPos(newPos);
+  }
+
+  function onCoverDragEnd() {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    localStorage.setItem("coverPos", JSON.stringify(coverPosRef.current));
+  }
+
+  function saveCoverPos() {
+    dragRef.current = null;
+    setEditingCover(false);
+    localStorage.setItem("coverPos", JSON.stringify(coverPosRef.current));
+  }
 
   async function handleShare() {
     const url = `${window.location.origin}/family`;
@@ -193,31 +265,88 @@ export default function DashboardPage() {
       )}
 
       {/* ── COVER IMAGE HERO ── */}
-      <div className="relative w-full" style={{ height: 220 }}>
-        <img src="/khoi1.jpeg" alt="cover" className="w-full h-full object-cover object-top" />
+      <div
+        className="relative w-full overflow-hidden select-none"
+        style={{
+          height: 220,
+          cursor: editingCover ? "grab" : undefined,
+          touchAction: editingCover ? "none" : undefined,
+        }}
+        onMouseDown={editingCover ? onCoverDragStart : undefined}
+        onMouseMove={editingCover ? onCoverDragMove : undefined}
+        onMouseUp={editingCover ? onCoverDragEnd : undefined}
+        onMouseLeave={editingCover ? onCoverDragEnd : undefined}
+        onTouchStart={editingCover ? onCoverDragStart : undefined}
+        onTouchMove={editingCover ? onCoverDragMove : undefined}
+        onTouchEnd={editingCover ? onCoverDragEnd : undefined}
+      >
+        <img
+          src={coverImage}
+          alt="cover"
+          draggable={false}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: `${coverPos.x}% ${coverPos.y}%` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+        {/* Drag hint shown while repositioning */}
+        {editingCover && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
+            <div className="bg-black/50 rounded-full px-4 py-2 text-white text-sm font-medium">
+              ↔ Kéo để di chuyển ảnh
+            </div>
+          </div>
+        )}
+
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12">
           <p className="text-white font-bold text-base tracking-wide">Nhật ký Khôi</p>
-          <div className="flex items-center gap-3">
-            <button onClick={handleShare} className="text-amber-300 text-sm font-medium">
-              {shareCopied ? "✓ Đã copy!" : "🔗 Chia sẻ"}
+          {editingCover ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); saveCoverPos(); }}
+              className="bg-white text-gray-900 text-sm font-semibold rounded-full px-4 py-1.5 shadow-lg"
+            >
+              Xong
             </button>
-            <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
-              Đăng xuất
+          ) : (
+            <div className="flex items-center gap-3">
+              <button onClick={handleShare} className="text-amber-300 text-sm font-medium">
+                {shareCopied ? "✓ Đã copy!" : "🔗 Chia sẻ"}
+              </button>
+              <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-white/60 text-sm">
+                Đăng xuất
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Profile + name + edit cover button at bottom */}
+        {!editingCover && (
+          <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 px-4 pb-4">
+            <div className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-amber-400 shadow-lg">
+              <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
+            </div>
+            <div className="pb-0.5 flex-1">
+              <p className="text-white font-bold text-lg leading-tight">Lê Minh Khôi</p>
+              <p className="text-amber-300 text-xs mt-0.5">{getKhoiAge()} · Sinh 6/2/2022</p>
+            </div>
+            <button
+              onClick={() => coverFileRef.current?.click()}
+              className="flex-shrink-0 bg-black/40 backdrop-blur-sm text-white text-xs font-semibold rounded-full px-3 py-1.5 border border-white/30 active:scale-95 transition-transform"
+            >
+              📷 Đổi ảnh
             </button>
           </div>
-        </div>
-        {/* Profile + name at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 px-4 pb-4">
-          <div className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-amber-400 shadow-lg">
-            <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
-          </div>
-          <div className="pb-0.5">
-            <p className="text-white font-bold text-lg leading-tight">Lê Minh Khôi</p>
-            <p className="text-amber-300 text-xs mt-0.5">{getKhoiAge()} · Sinh 6/2/2022</p>
-          </div>
-        </div>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          ref={coverFileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleCoverFile}
+        />
       </div>
 
       <div className="pb-2">
