@@ -52,8 +52,11 @@ export default function DashboardPage() {
   const [coverTy, setCoverTy] = useState(0);
   const [coverScale, setCoverScale] = useState(1);
   const [editingCover, setEditingCover] = useState(false);
-  // Natural image size — set in onLoad so we can position the img explicitly
-  const [imgNatural, setImgNatural] = useState({ w: 0, h: 0 });
+  // imgBase: image dimensions at scale=1 (cover = fill the container exactly)
+  const [imgBase, setImgBase] = useState({ w: 0, h: 0 });
+  // minScale: scale at which the full image is visible (no black bars)
+  const [minScale, setMinScale] = useState(0.3);
+  const minScaleRef = useRef(0.3);
   const coverContainerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const coverFileRef = useRef<HTMLInputElement>(null);
@@ -61,19 +64,15 @@ export default function DashboardPage() {
   const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
   const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
 
-  // Compute rendered image dimensions: scale=1 means "cover" (fill the container)
-  function getImgSize(scale: number) {
+  function clampTranslate(tx: number, ty: number, scale: number) {
     const cW = coverContainerRef.current?.clientWidth ?? 375;
     const cH = coverContainerRef.current?.clientHeight ?? 220;
-    if (!imgNatural.w || !imgNatural.h) return { w: cW, h: cH, cW, cH };
-    const norm = Math.max(cW / imgNatural.w, cH / imgNatural.h); // scale-to-cover factor
-    return { w: imgNatural.w * norm * scale, h: imgNatural.h * norm * scale, cW, cH };
-  }
-
-  function clampTranslate(tx: number, ty: number, scale: number) {
-    const { w, h, cW, cH } = getImgSize(scale);
-    // When image fills/overflows container: don't show background at edges
-    // When image is smaller (zoomed out): allow centering with some play
+    const bW = imgBase.w || cW;
+    const bH = imgBase.h || cH;
+    const w = bW * scale;
+    const h = bH * scale;
+    // When image overflows: keep edges inside container
+    // When image is smaller than container: center it with some play
     const maxTx = w >= cW ? (w - cW) / 2 : (cW - w) / 2;
     const maxTy = h >= cH ? (h - cH) / 2 : (cH - h) / 2;
     return {
@@ -83,8 +82,26 @@ export default function DashboardPage() {
   }
 
   function onCoverImgLoad() {
-    if (!imgRef.current) return;
-    setImgNatural({ w: imgRef.current.naturalWidth, h: imgRef.current.naturalHeight });
+    const el = imgRef.current;
+    const con = coverContainerRef.current;
+    if (!el || !con) return;
+    const { naturalWidth: iW, naturalHeight: iH } = el;
+    const cW = con.clientWidth || 375;
+    const cH = con.clientHeight || 220;
+    // Compute the "cover" base size (scale=1 fills the container)
+    const norm = Math.max(cW / iW, cH / iH);
+    const baseW = iW * norm;
+    const baseH = iH * norm;
+    setImgBase({ w: baseW, h: baseH });
+    // minScale = scale at which full image just fits (contain)
+    const minS = Math.min(cW / baseW, cH / baseH);
+    setMinScale(minS);
+    minScaleRef.current = minS;
+    // If DB had a stale scale below the contain level, reset to 1 (fill container)
+    if (coverRef.current.scale < minS) {
+      setCoverTx(0); setCoverTy(0); setCoverScale(1);
+      coverRef.current = { ...coverRef.current, tx: 0, ty: 0, scale: 1 };
+    }
   }
 
   useEffect(() => {
@@ -123,7 +140,7 @@ export default function DashboardPage() {
     if (res.ok) {
       const { url } = await res.json();
       setCoverImage(url);
-      setImgNatural({ w: 0, h: 0 }); // reset until new image loads
+      setImgBase({ w: 0, h: 0 }); // reset until new image loads
       setCoverTx(0); setCoverTy(0); setCoverScale(1);
       coverRef.current = { tx: 0, ty: 0, scale: 1, image: url };
       toast.success("Đã đổi ảnh bìa!", { id: toastId });
@@ -169,7 +186,7 @@ export default function DashboardPage() {
     if (e.touches.length === 2 && pinchRef.current) {
       const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
       applyTransform(coverRef.current.tx, coverRef.current.ty,
-        Math.max(0.3, Math.min(5, pinchRef.current.scale * (dist / pinchRef.current.dist))));
+        Math.max(minScaleRef.current, Math.min(5, pinchRef.current.scale * (dist / pinchRef.current.dist))));
     } else {
       onCoverDragMove(e);
     }
@@ -181,7 +198,7 @@ export default function DashboardPage() {
   }
 
   function setZoom(value: number) {
-    applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(0.3, Math.min(5, value)));
+    applyTransform(coverRef.current.tx, coverRef.current.ty, Math.max(minScaleRef.current, Math.min(5, value)));
   }
 
   function saveCoverPos() {
@@ -353,8 +370,9 @@ export default function DashboardPage() {
         onTouchEnd={editingCover ? onCoverPointerEnd : undefined}
       >
         {(() => {
-          const { w: iW, h: iH } = getImgSize(coverScale);
-          const loaded = imgNatural.w > 0;
+          const loaded = imgBase.w > 0;
+          const iW = imgBase.w * coverScale;
+          const iH = imgBase.h * coverScale;
           return (
             <img
               ref={imgRef}
@@ -413,7 +431,7 @@ export default function DashboardPage() {
                   <circle cx="11" cy="11" r="4"/><path d="M20 20l-4-4"/>
                 </svg>
                 <input
-                  type="range" min="0.3" max="5" step="0.02"
+                  type="range" min={minScale} max="5" step="0.02"
                   value={coverScale}
                   onChange={(e) => setZoom(parseFloat(e.target.value))}
                   className="flex-1"
