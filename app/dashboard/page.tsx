@@ -215,15 +215,15 @@ export default function DashboardPage() {
 
       {/* Detail view */}
       {selected && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
-            <button onClick={() => setSelected(null)} className="text-gray-400">
+        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: "var(--bg)" }}>
+          <div className="sticky top-0 px-4 py-4 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" }}>
+            <button onClick={() => setSelected(null)} style={{ color: "var(--text-2)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
-            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-amber-700 font-medium">Sửa</button>
+            <h2 className="text-base font-semibold flex-1 truncate" style={{ color: "var(--text)" }}>{selected.title}</h2>
+            <button onClick={() => { setEditingEntry(selected); setSelected(null); }} className="text-sm text-amber-500 font-medium">Sửa</button>
             <button onClick={() => deleteEntry(selected.id)} className="text-sm text-red-400 font-medium">Xóa</button>
           </div>
           {selected.images.length > 0 && (
@@ -238,15 +238,15 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               {selected.emoji && <span className="text-3xl">{selected.emoji}</span>}
               <div>
-                <p className="text-base font-semibold text-gray-800">{selected.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{formatDateRangeLong(selected.date, selected.metadata.endDate as string)}</p>
-                <p className="text-xs text-gray-400">{ENTRY_TYPE_LABELS[selected.type]}</p>
+                <p className="text-base font-semibold" style={{ color: "var(--text)" }}>{selected.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-2)" }}>{formatDateRangeLong(selected.date, selected.metadata.endDate as string)}</p>
+                <p className="text-xs" style={{ color: "var(--text-2)" }}>{ENTRY_TYPE_LABELS[selected.type]}</p>
               </div>
             </div>
             {selected.description && (
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-2)" }}>{selected.description}</p>
             )}
-            {selected.author && <p className="text-xs text-gray-300 mt-4">Ghi bởi {selected.author.name}</p>}
+            {selected.author && <p className="text-xs mt-4" style={{ color: "var(--text-3)" }}>Ghi bởi {selected.author.name}</p>}
           </div>
         </div>
       )}
@@ -254,16 +254,17 @@ export default function DashboardPage() {
       {/* Countries modal */}
       {showCountriesModal && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/30" onClick={() => setShowCountriesModal(false)}>
-          <div className="w-full bg-white rounded-t-2xl px-4 pt-3 pb-10 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-            <h3 className="text-base font-semibold text-gray-800 mb-3">🌏 Quốc gia đã đến</h3>
+          <div className="w-full rounded-t-2xl px-4 pt-3 pb-10 shadow-xl" style={{ backgroundColor: "var(--bg-card)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="w-8 h-1 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--border-2)" }} />
+            <h3 className="text-base font-semibold mb-3" style={{ color: "var(--text)" }}>🌏 Quốc gia đã đến</h3>
             <div className="space-y-2">
               {Object.entries(countryBreakdown).sort((a, b) => b[1] - a[1]).map(([country, count]) => (
                 <Link key={country} href={`/travel?country=${encodeURIComponent(country)}`}
                   onClick={() => setShowCountriesModal(false)}
-                  className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl active:bg-gray-100 transition">
-                  <span className="text-sm font-medium text-gray-700">{country}</span>
-                  <span className="text-sm text-teal-600 font-semibold">{count} chuyến ›</span>
+                  className="flex items-center justify-between px-4 py-3 rounded-xl transition"
+                  style={{ backgroundColor: "var(--bg-card2)" }}>
+                  <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{country}</span>
+                  <span className="text-sm text-teal-500 font-semibold">{count} chuyến ›</span>
                 </Link>
               ))}
             </div>
