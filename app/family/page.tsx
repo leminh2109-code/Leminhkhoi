@@ -169,10 +169,6 @@ export default function FamilyPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-        <div className="absolute top-0 left-0 right-0 px-4 pt-12">
-          <p className="text-white font-bold text-base tracking-wide">Nhật ký Khôi</p>
-        </div>
-
         <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 px-4 pb-4">
           <div className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-amber-400 shadow-lg">
             <img src="/khoi-icon.png" alt="Khôi" className="w-full h-full object-cover object-top" />
