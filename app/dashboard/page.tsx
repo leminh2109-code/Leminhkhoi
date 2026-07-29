@@ -306,8 +306,7 @@ export default function DashboardPage() {
         )}
 
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12">
-          <p className="text-white font-bold text-base tracking-wide">Nhật ký Khôi</p>
+        <div className="absolute top-0 right-0 px-4 pt-12">
           {editingCover ? (
             <button
               onClick={(e) => { e.stopPropagation(); saveCoverPos(); }}
