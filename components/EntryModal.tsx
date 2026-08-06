@@ -185,7 +185,7 @@ export function EntryModal({ defaultType = "MEMORY", entry, onClose, onSaved }: 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    <div className="fixed inset-0 z-[2000] flex flex-col bg-white text-gray-900">
       {lightboxIndex !== null && (
         <ImageLightbox images={images} index={lightboxIndex} onClose={() => setLightboxIndex(null)} />
       )}

@@ -78,14 +78,14 @@ export default function FriendsPage() {
 
       {/* Trip detail overlay — above friend detail */}
       {selectedTrip && (
-        <div className="fixed inset-0 z-[60] bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
-            <button onClick={() => setSelectedTrip(null)} className="text-gray-400">
+        <div className="fixed inset-0 z-[60] overflow-y-auto" style={{ backgroundColor: "var(--bg)" }}>
+          <div className="sticky top-0 px-4 py-4 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" }}>
+            <button onClick={() => setSelectedTrip(null)} style={{ color: "var(--text-2)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selectedTrip.title}</h2>
+            <h2 className="text-base font-semibold flex-1 truncate" style={{ color: "var(--text)" }}>{selectedTrip.title}</h2>
           </div>
 
           {selectedTrip.images.length > 0 && (
@@ -99,39 +99,39 @@ export default function FriendsPage() {
 
           <div className="px-4 py-4 space-y-3">
             <div>
-              <p className="text-xl font-semibold text-gray-900 leading-snug">{selectedTrip.title}</p>
+              <p className="text-xl font-semibold leading-snug" style={{ color: "var(--text)" }}>{selectedTrip.title}</p>
               {getTravelLocations(selectedTrip.metadata).length > 0 && (
-                <p className="text-sm text-teal-600 mt-1 leading-relaxed">
+                <p className="text-sm text-teal-500 mt-1 leading-relaxed">
                   📍 {getTravelLocations(selectedTrip.metadata).join(" · ")}
                 </p>
               )}
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm mt-1" style={{ color: "var(--text-3)" }}>
                 {formatDateRange(selectedTrip.date, selectedTrip.metadata.endDate as string)}
               </p>
               {!!selectedTrip.metadata.country && (
-                <span className="inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                <span className="inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--bg-card2)", color: "var(--text-2)" }}>
                   🌏 {String(selectedTrip.metadata.country)}
                 </span>
               )}
             </div>
             {selectedTrip.description && (
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedTrip.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-2)" }}>{selectedTrip.description}</p>
             )}
-            <p className="text-xs text-gray-300 pt-2">Ghi bởi {selectedTrip.author.name}</p>
+            <p className="text-xs pt-2" style={{ color: "var(--text-3)" }}>Ghi bởi {selectedTrip.author.name}</p>
           </div>
         </div>
       )}
 
       {/* Detail view */}
       {selected && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
-            <button onClick={() => setSelected(null)} className="text-gray-400">
+        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: "var(--bg)" }}>
+          <div className="sticky top-0 px-4 py-4 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" }}>
+            <button onClick={() => setSelected(null)} style={{ color: "var(--text-2)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
+            <h2 className="text-base font-semibold flex-1 truncate" style={{ color: "var(--text)" }}>{selected.title}</h2>
             <button
               onClick={() => { setEditingEntry(selected); setSelected(null); }}
               className="text-sm text-amber-700 font-medium"
@@ -161,8 +161,8 @@ export default function FriendsPage() {
                 {selected.emoji || "👫"}
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-800">{selected.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Quen từ {formatDate(selected.date)}</p>
+                <p className="text-lg font-semibold" style={{ color: "var(--text)" }}>{selected.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>Quen từ {formatDate(selected.date)}</p>
                 {(tripCounts[selected.id] || 0) > 0 && (
                   <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">
                     ✈️ Đã đi {tripCounts[selected.id]} chuyến cùng Khôi
@@ -172,13 +172,13 @@ export default function FriendsPage() {
             </div>
 
             {!!(selected.metadata.address || selected.metadata.fatherName || selected.metadata.motherName || selected.metadata.phone) && (
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+              <div className="rounded-2xl p-4 space-y-3" style={{ backgroundColor: "var(--bg-card2)" }}>
                 {!!selected.metadata.address && (
                   <div className="flex items-start gap-3">
                     <span className="text-lg mt-0.5">🏠</span>
                     <div>
-                      <p className="text-xs text-gray-400 font-medium">Địa chỉ</p>
-                      <p className="text-sm text-gray-700 mt-0.5">{String(selected.metadata.address)}</p>
+                      <p className="text-xs font-medium" style={{ color: "var(--text-3)" }}>Địa chỉ</p>
+                      <p className="text-sm mt-0.5" style={{ color: "var(--text-2)" }}>{String(selected.metadata.address)}</p>
                     </div>
                   </div>
                 )}
@@ -186,12 +186,12 @@ export default function FriendsPage() {
                   <div className="flex items-start gap-3">
                     <span className="text-lg mt-0.5">👨‍👩‍👦</span>
                     <div>
-                      <p className="text-xs text-gray-400 font-medium">Bố mẹ</p>
+                      <p className="text-xs font-medium" style={{ color: "var(--text-3)" }}>Bố mẹ</p>
                       {!!selected.metadata.fatherName && (
-                        <p className="text-sm text-gray-700 mt-0.5">Bố: {String(selected.metadata.fatherName)}</p>
+                        <p className="text-sm mt-0.5" style={{ color: "var(--text-2)" }}>Bố: {String(selected.metadata.fatherName)}</p>
                       )}
                       {!!selected.metadata.motherName && (
-                        <p className="text-sm text-gray-700">Mẹ: {String(selected.metadata.motherName)}</p>
+                        <p className="text-sm" style={{ color: "var(--text-2)" }}>Mẹ: {String(selected.metadata.motherName)}</p>
                       )}
                     </div>
                   </div>
@@ -200,8 +200,8 @@ export default function FriendsPage() {
                   <div className="flex items-start gap-3">
                     <span className="text-lg mt-0.5">📞</span>
                     <div>
-                      <p className="text-xs text-gray-400 font-medium">Số điện thoại</p>
-                      <p className="text-sm text-gray-700 mt-0.5">{String(selected.metadata.phone)}</p>
+                      <p className="text-xs font-medium" style={{ color: "var(--text-3)" }}>Số điện thoại</p>
+                      <p className="text-sm mt-0.5" style={{ color: "var(--text-2)" }}>{String(selected.metadata.phone)}</p>
                     </div>
                   </div>
                 )}
@@ -209,7 +209,7 @@ export default function FriendsPage() {
             )}
 
             {selected.description && (
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-2)" }}>{selected.description}</p>
             )}
 
             {(() => {
@@ -219,7 +219,7 @@ export default function FriendsPage() {
               if (sharedTrips.length === 0) return null;
               return (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">✈️ Chuyến đi cùng nhau</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-3)" }}>✈️ Chuyến đi cùng nhau</p>
                   <div className="space-y-2">
                     {sharedTrips.map((trip) => (
                       <button key={trip.id} onClick={() => setSelectedTrip(trip)}
@@ -250,7 +250,7 @@ export default function FriendsPage() {
               );
             })()}
 
-            <p className="text-xs text-gray-300">Ghi bởi {selected.author.name}</p>
+            <p className="text-xs" style={{ color: "var(--text-3)" }}>Ghi bởi {selected.author.name}</p>
           </div>
         </div>
       )}

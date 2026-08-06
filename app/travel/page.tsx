@@ -141,14 +141,14 @@ function TravelPageInner() {
 
       {/* Detail view */}
       {selected && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
-            <button onClick={() => setSelected(null)} className="text-gray-400">
+        <div className="fixed inset-0 z-[1000] overflow-y-auto" style={{ backgroundColor: "var(--bg)" }}>
+          <div className="sticky top-0 px-4 py-4 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-2)" }}>
+            <button onClick={() => setSelected(null)} style={{ color: "var(--text-2)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h2 className="text-base font-semibold text-gray-800 flex-1 truncate">{selected.title}</h2>
+            <h2 className="text-base font-semibold flex-1 truncate" style={{ color: "var(--text)" }}>{selected.title}</h2>
             <button
               onClick={() => { setEditingEntry(selected); setSelected(null); }}
               className="text-sm text-amber-700 font-medium"
@@ -174,13 +174,13 @@ function TravelPageInner() {
 
           <div className="px-4 py-4 space-y-3">
             <div>
-              <p className="text-xl font-semibold text-gray-900 leading-snug">{selected.title}</p>
+              <p className="text-xl font-semibold leading-snug" style={{ color: "var(--text)" }}>{selected.title}</p>
               {getTravelLocations(selected.metadata).length > 0 && (
-                <p className="text-sm text-teal-600 mt-1 leading-relaxed">
+                <p className="text-sm text-teal-500 mt-1 leading-relaxed">
                   📍 {getTravelLocations(selected.metadata).join(" · ")}
                 </p>
               )}
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm mt-1" style={{ color: "var(--text-3)" }}>
                 {formatDateRange(selected.date, selected.metadata.endDate as string)}
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -188,7 +188,7 @@ function TravelPageInner() {
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-teal-50 text-teal-600">Lần đầu ✨</span>
                 )}
                 {!!(selected.metadata.country) && (
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--bg-card2)", color: "var(--text-2)" }}>
                     🌏 {String(selected.metadata.country)}
                   </span>
                 )}
@@ -196,10 +196,10 @@ function TravelPageInner() {
             </div>
 
             {selected.description && (
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-2)" }}>{selected.description}</p>
             )}
 
-            <p className="text-xs text-gray-300 pt-2">Ghi bởi {selected.author.name}</p>
+            <p className="text-xs pt-2" style={{ color: "var(--text-3)" }}>Ghi bởi {selected.author.name}</p>
           </div>
         </div>
       )}
@@ -266,8 +266,8 @@ function TravelPageInner() {
 
         {/* Bản đồ */}
         {!countryFilter && !locationFilter && entries.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
-            <p className="text-sm font-semibold text-gray-700 mb-3">🗺️ Bản đồ</p>
+          <div className="rounded-2xl border p-4 mb-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)", isolation: "isolate" }}>
+            <p className="text-sm font-semibold mb-3" style={{ color: "var(--text-2)" }}>🗺️ Bản đồ</p>
             <WorldMap
               entries={entries}
               onLocationClick={(loc) => setLocationFilter(loc)}
