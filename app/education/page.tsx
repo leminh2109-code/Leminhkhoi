@@ -135,6 +135,13 @@ export default function EducationPage() {
                       {e.description && (
                         <p className="text-xs text-gray-500 mt-2 leading-relaxed whitespace-pre-wrap">{e.description}</p>
                       )}
+                      {e.images.length > 0 && (
+                        <div className="flex gap-2 mt-3 flex-wrap">
+                          {e.images.map((img, idx) => (
+                            <img key={idx} src={img} alt="" className="w-20 h-20 rounded-lg object-cover" />
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex border-t border-gray-50">
                       <button
